@@ -2,12 +2,18 @@ import pandas as pd
 import os
 from loader import Loader
 from JsonReader import createJsonReader,getDictFromJsonReader
+from PIL import Image
+import torchvision.transforms as tr
 class ImageLoader(Loader):
 
     def __init__(self,dictionary, dataset_path) -> None:
         super().__init__(dictionary)
         self.__dataset_path= dataset_path
         self.__filter()
+        self.__transform= tr.Compose([
+            tr.PILToTensor(),
+            tr.Resize((1024,1024)),
+        ])
 
     def __filter(self):
         for i in range(len(self)):
@@ -22,11 +28,14 @@ class ImageLoader(Loader):
         path= self.__dataset_path+path
         return os.path.exists(path)
     
-    def __getitem__(self, idx) -> object:
-        element= self._dataset.loc[self._dataset['id']==idx]
+    def getByID(self,id) ->object:
+        element= self._dataset.loc[self._dataset['id']==id]
         if len(element):
             return element.iloc[0]
         return None 
+
+    def load_image(self,path):
+        return self.__transform(Image.open(self.__dataset_path+path))
     
 if __name__=='__main__':
     createJsonReader('../coco_format_fish_data.json')

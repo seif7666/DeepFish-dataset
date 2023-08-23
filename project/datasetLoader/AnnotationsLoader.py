@@ -12,7 +12,7 @@ class AnnotationsLoader(Loader):
     def __filter(self,imageLoader:ImageLoader):
         for i in range(len(self)):
             row= super().__getitem__(i)
-            if imageLoader[row['image_id']] is None:
+            if imageLoader.getByID(row['image_id']) is None:
                 self._dataset.loc[i,'image_id']= None
         length= len(self)
         self._dataset= self._dataset.dropna()
