@@ -22,6 +22,12 @@ class ImageLoader(Loader):
         path= self.__dataset_path+path
         return os.path.exists(path)
     
+    def __getitem__(self, idx) -> object:
+        element= self._dataset.loc[self._dataset['id']==idx]
+        if len(element):
+            return element.iloc[0]
+        return None 
+    
 if __name__=='__main__':
     createJsonReader('../coco_format_fish_data.json')
     dictionary= getDictFromJsonReader('images')
