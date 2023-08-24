@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset,DataLoader
-from EstimationLoader import EstimationLoader
+from .EstimationLoader import EstimationLoader
 from torchvision.transforms import Compose,ToTensor
 class EstimatedDeepFish(Dataset):
     def __init__(self, csv_path:str, dataset_path:str) -> None:
