@@ -23,6 +23,10 @@ class ImageLoader(Loader):
         length= len(self)
         self._dataset= self._dataset.dropna()
         print(f'{length- len(self)} rows were removed from image dataset!')
+    
+    def containsFileName(self,file_name:str):
+        element= self._dataset.loc[self._dataset['file_name']==file_name]
+        return len(element)>0
 
     def __is_file_exists(self,path):
         path= self.__dataset_path+path
