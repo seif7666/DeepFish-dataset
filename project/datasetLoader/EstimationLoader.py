@@ -11,9 +11,12 @@ class EstimationLoader:
 
         # self.__rename()
         self.__filter()
-        # print(self.__dataset.columns)
+        print(self.__dataset.columns)
         
     def __filter(self):
+        self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
+        self.__image_files=self.__dataset['file'].unique().tolist()
+
         deleted_files= []
         for i in range(len(self.__image_files)):
             file= self.__image_files[i]
@@ -25,11 +28,6 @@ class EstimationLoader:
             self.__image_files.remove(file)
         
         print(f'{length- len(self.__image_files)} rows were removed from image dataset!')
-        # print(len(self.__image_files))
-
-        # print(len(self.__dataset))
-        self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
-        # print(len(self.__dataset))
         for file in deleted_files:
             self.__dataset.drop(self.__dataset[self.__dataset.file==file].index,inplace=True)
         print(len(self.__dataset))
@@ -51,18 +49,21 @@ class EstimationLoader:
         filename= self.__image_files[idx]
         image= self.__loadImage(filename+'.jpg')
         annotations= self.__dataset.loc[self.__dataset['file']==filename]
-        bboxes= np.zeros((len(annotations),4))
-        for i in range(len(bboxes)):
+        bboxes= np.zeros((13,4))
+        sizes= np.zeros((13,1))
+        for i in range(len(annotations)):
             string= annotations['bbox'].iloc[i]
             string= string.split(']')[0].split('[')[1]
             nums= string.split(',')
             for c in range(4):
                 bboxes[i,c]=float(nums[c])
-
+            sizes[i,0]= annotations['size (cm)'].iloc[i]
+        
         return {
             'image': image,
             'gt_bbox': bboxes,
-            'size': annotations['size (cm)'].to_numpy()            
+            'size': sizes,  
+            'number': len(annotations)        
         }
     def __len__(self):
         return len(self.__image_files)
