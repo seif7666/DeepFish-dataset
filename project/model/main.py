@@ -1,4 +1,3 @@
-from retinanet.model import resnet34
+from project.model.retinanet.model import resnet34
 
-model = resnet34()
-print(model)
+model = resnet34(5)
