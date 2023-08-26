@@ -21,6 +21,9 @@ class EstimationLoader:
         self.__filter()
         del self.__dataset['Unnamed: 0']
         print(self.__dataset.columns)
+    
+    def getNumClasses(self):
+        return self.__encoder.categories_
         
     def __filter(self):
         # self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)

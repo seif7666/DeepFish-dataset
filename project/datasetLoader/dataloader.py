@@ -41,7 +41,9 @@ class EstimatedDeepFish(Dataset):
         sample['size']= dictionary['size']
         sample['number']= dictionary['number']
         return sample
-        
+    
+    def num_classes(self):
+        return self.__estimationLoader.getNumClasses()
     def __len__(self):
         return len(self.__estimationLoader)
 
