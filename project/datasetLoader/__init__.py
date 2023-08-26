@@ -1,4 +1,4 @@
-from .loader import Loader
+# from .loader import Loader
 from .JsonReader import getDictFromJsonReader,createJsonReader
 # from .ImageLoader import ImageLoader
 # from .AnnotationsLoader import AnnotationsLoader
