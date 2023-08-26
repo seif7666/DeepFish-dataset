@@ -35,7 +35,7 @@ class EstimatedDeepFish(Dataset):
         if self.transform:
             sample = self.transform(sample)
         img= sample['img']
-        if img.shape[2]<img.shape[1]:
+        if img.shape[1]!=384 or img.shape[1]!=512:
             return random.randint(0,len(self.__estimationLoader))
         sample['size']= dictionary['size']
         sample['number']= dictionary['number']
