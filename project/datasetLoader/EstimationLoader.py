@@ -62,7 +62,7 @@ class EstimationLoader:
             image= self.__loadImage(filename+'.JPG')
 
         annotations= self.__dataset.loc[self.__dataset['file']==filename]
-        length= 13#len(annotations)
+        length= 20#len(annotations)
         bboxes= torch.zeros((length,5))
         sizes= torch.zeros((length,1))
         for i in range(len(annotations)):
