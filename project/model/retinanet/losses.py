@@ -41,17 +41,16 @@ class FocalLoss(nn.Module):
         anchor_ctr_x   = anchor[:, 0] + 0.5 * anchor_widths
         anchor_ctr_y   = anchor[:, 1] + 0.5 * anchor_heights
 
-        lengths= torch.ones(classifications.shape[0])
-        for j in range(batch_size):
-            lengths[j,0]= annotations['length']
-        classification_loss= regressionLengthLoss.forward(classifications,lengths)
+        print(classifications.shape)
+        # classification_loss= regressionLengthLoss.forward(classifications,lengths)
         for j in range(batch_size):
 
             # classification = classifications[j, :, :]
             regression = regressions[j, :, :]
 
-            bbox_annotation = annotations[j, :, :]
-            bbox_annotation = bbox_annotation[bbox_annotation[:, 4] != -1]
+            bbox_annotation = annotations[0][j, :annotations[2][j], :]
+            print(bbox_annotation)
+            # bbox_annotation = bbox_annotation[bbox_annotation[:, 4] != -1]
 
             # classification = torch.clamp(classification, 1e-4, 1.0 - 1e-4)
 

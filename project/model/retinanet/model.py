@@ -122,7 +122,7 @@ class LengthRegressionModel(nn.Module):
         self.conv4 = nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1)
         self.act4 = nn.ReLU()
 
-        self.output = nn.Conv2d(feature_size, num_anchors * num_classes, kernel_size=3, padding=1)
+        self.output = nn.Conv2d(feature_size, num_anchors, kernel_size=3, padding=1)
         self.output_act = nn.Sigmoid()
 
     def forward(self, x):
@@ -144,6 +144,7 @@ class LengthRegressionModel(nn.Module):
         # out is B x C x W x H, with C = n_classes + n_anchors
         out1 = out.permute(0, 2, 3, 1)
         batch_size, width, height, channels = out1.shape
+        print(out1.shape)
         out2 = out1.view(batch_size, width, height, self.num_anchors)
         return out2.contiguous().view(x.shape[0], -1)
 
@@ -227,7 +228,7 @@ class ResNet(nn.Module):
     def forward(self, inputs):
 
         if self.training:
-            img_batch, annotations = inputs['image'],(inputs['gt_bbox'],inputs['size'])
+            img_batch, annotations = inputs['image'],(inputs['gt_bbox'],inputs['size'],inputs['number'])
         else:
             img_batch = inputs
 
@@ -240,11 +241,9 @@ class ResNet(nn.Module):
         x2 = self.layer2(x1)
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
-
         features = self.fpn([x2, x3, x4])
 
         regression = torch.cat([self.regressionModel(feature) for feature in features], dim=1)
-
         classification = torch.cat([self.classificationModel(feature) for feature in features], dim=1)
 
         anchors = self.anchors(img_batch)
