@@ -34,9 +34,10 @@ class EstimatedDeepFish(Dataset):
         sample = {'img': dictionary['image'], 'annot': dictionary['annots'],'size':dictionary['size']}
         if self.transform:
             sample = self.transform(sample)
+        
         img= sample['img']
-        if img.shape[1]!=384 or img.shape[1]!=512:
-            return random.randint(0,len(self.__estimationLoader))
+        if img.shape[1]!=384 or img.shape[2]!=512:
+            return self[random.randint(0,len(self.__estimationLoader))]
         sample['size']= dictionary['size']
         sample['number']= dictionary['number']
         return sample
@@ -217,7 +218,7 @@ class AspectRatioBasedSampler(Sampler):
 
 
 if __name__=='__main__':
-    dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/',Compose([Normalizer(), Augmenter(), Resizer()]))
+    dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/',Compose([Normalizer(), Augmenter(), Resizer(480,480),Permuter()]))
     # print(dataset[0])
     dataloader= DataLoader(dataset,2)
     print(next(iter(dataloader)))
