@@ -19,6 +19,7 @@ except:
 import torch
 
 from torchvision.transforms import Compose,ToTensor,Resize
+import random 
 
 class EstimatedDeepFish(Dataset):
     def __init__(self, csv_path:str, dataset_path:str, transform=None) -> None:
@@ -27,6 +28,8 @@ class EstimatedDeepFish(Dataset):
         self.transform= transform
 
     def __getitem__(self, idx) -> dict:
+        if idx in [48,50]:
+            return self[random.randint(0,len(self)-1)]
         dictionary= self.__estimationLoader[idx]
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
@@ -82,7 +85,14 @@ def collater(data):
 class Resizer(object):
     """Convert ndarrays in sample to Tensors."""
 
-    def __call__(self, sample, min_side=608, max_side=1024):
+    def __init__(self,min_side=608, max_side= 1024):
+        super().__init__()
+        self.minSide= min_side
+        self.maxSide= max_side
+
+
+    def __call__(self, sample):
+        min_side,max_side= self.minSide,self.maxSide
         image, annots = sample['img'], sample['annot']
 
         rows, cols, cns = image.shape
