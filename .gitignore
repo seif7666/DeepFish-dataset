@@ -4,3 +4,9 @@ DATASET/
 fish*
 coco*
 size*
+.DS_Store
+.vscode/
+venv/
+json/
+*.csv
+*.pth
