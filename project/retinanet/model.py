@@ -104,10 +104,11 @@ class RegressionModel(nn.Module):
         return out.contiguous().view(out.shape[0], -1, 4)
 
 
-class LengthRegressionModel(nn.Module):
+class ClassificationModel(nn.Module):
     def __init__(self, num_features_in, num_anchors=9, num_classes=80, prior=0.01, feature_size=256):
-        super(LengthRegressionModel, self).__init__()
+        super(ClassificationModel, self).__init__()
 
+        self.num_classes = num_classes
         self.num_anchors = num_anchors
 
         self.conv1 = nn.Conv2d(num_features_in, feature_size, kernel_size=3, padding=1)
@@ -122,7 +123,7 @@ class LengthRegressionModel(nn.Module):
         self.conv4 = nn.Conv2d(feature_size, feature_size, kernel_size=3, padding=1)
         self.act4 = nn.ReLU()
 
-        self.output = nn.Conv2d(feature_size, num_anchors, kernel_size=3, padding=1)
+        self.output = nn.Conv2d(feature_size, num_anchors * num_classes, kernel_size=3, padding=1)
         self.output_act = nn.Sigmoid()
 
     def forward(self, x):
@@ -139,14 +140,16 @@ class LengthRegressionModel(nn.Module):
         out = self.act4(out)
 
         out = self.output(out)
-        # out = self.output_act(out)
+        out = self.output_act(out)
 
         # out is B x C x W x H, with C = n_classes + n_anchors
         out1 = out.permute(0, 2, 3, 1)
+
         batch_size, width, height, channels = out1.shape
-        print(out1.shape)
-        out2 = out1.view(batch_size, width, height, self.num_anchors)
-        return out2.contiguous().view(x.shape[0], -1)
+
+        out2 = out1.view(batch_size, width, height, self.num_anchors, self.num_classes)
+
+        return out2.contiguous().view(x.shape[0], -1, self.num_classes)
 
 
 class ResNet(nn.Module):
@@ -175,7 +178,7 @@ class ResNet(nn.Module):
         self.fpn = PyramidFeatures(fpn_sizes[0], fpn_sizes[1], fpn_sizes[2])
 
         self.regressionModel = RegressionModel(256)
-        self.classificationModel = LengthRegressionModel(256)
+        self.classificationModel = ClassificationModel(256, num_classes=num_classes)
 
         self.anchors = Anchors()
 
@@ -228,7 +231,7 @@ class ResNet(nn.Module):
     def forward(self, inputs):
 
         if self.training:
-            img_batch, annotations = inputs['image'],(inputs['gt_bbox'],inputs['size'],inputs['number'])
+            img_batch, annotations = inputs
         else:
             img_batch = inputs
 
@@ -241,9 +244,11 @@ class ResNet(nn.Module):
         x2 = self.layer2(x1)
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
+
         features = self.fpn([x2, x3, x4])
 
         regression = torch.cat([self.regressionModel(feature) for feature in features], dim=1)
+
         classification = torch.cat([self.classificationModel(feature) for feature in features], dim=1)
 
         anchors = self.anchors(img_batch)

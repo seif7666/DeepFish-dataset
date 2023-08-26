@@ -21,7 +21,7 @@ class EstimatedDeepFish(Dataset):
         return len(self.__estimationLoader)
     
 if __name__=='__main__':
-    dataset= EstimatedDeepFish('size_estimation_homography_DeepFish.csv', 'DATASET\\')
+    dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/')
     print(dataset[0])
     dataloader= DataLoader(dataset,16)
     print(next(iter(dataloader)))

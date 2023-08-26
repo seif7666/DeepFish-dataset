@@ -3,6 +3,9 @@ import re
 import os
 from PIL import Image
 import numpy as np
+import torch
+import skimage
+
 class EstimationLoader:
     def __init__(self, path, dataset_path:str) -> None:
         self.__dataset= pd.read_csv(path)
@@ -47,10 +50,15 @@ class EstimationLoader:
 
     def __getitem__(self,idx):
         filename= self.__image_files[idx]
-        image= self.__loadImage(filename+'.jpg')
+        try:
+            image= self.__loadImage(filename+'.jpg')
+        except:
+            image= self.__loadImage(filename+'.JPG')
+
         annotations= self.__dataset.loc[self.__dataset['file']==filename]
-        bboxes= np.zeros((13,4))
-        sizes= np.zeros((13,1))
+        length= 13#len(annotations)
+        bboxes= torch.zeros((length,5))
+        sizes= torch.zeros((length,1))
         for i in range(len(annotations)):
             string= annotations['bbox'].iloc[i]
             string= string.split(']')[0].split('[')[1]
@@ -58,20 +66,28 @@ class EstimationLoader:
             for c in range(4):
                 bboxes[i,c]=float(nums[c])
             sizes[i,0]= annotations['size (cm)'].iloc[i]
+        bboxes[:,2]+= bboxes[:,0]
+        bboxes[:,3]+= bboxes[:,1]
+        bboxes[:,4]= 0
         
         return {
             'image': image,
-            'gt_bbox': bboxes,
-            'size': sizes,  
+            'annots': bboxes,
+            'size': sizes,
             'number': len(annotations)        
         }
     def __len__(self):
         return len(self.__image_files)
     def __str__(self) -> str:
         return str(self.__dataset.columns)
+    
     def __loadImage(self,path):
-        return Image.open(self.__DATASET_PATH+path)
+        path= self.__DATASET_PATH+path
+        img = skimage.io.imread(path)
+        if len(img.shape) == 2:
+            img = skimage.color.gray2rgb(img)
+        return img.astype(np.float32)/255.0
 if __name__ == '__main__':
-    load= EstimationLoader('size_estimation_homography_DeepFish.csv','DATASET/')
+    load= EstimationLoader('Project/size_estimation_homography_DeepFish.csv','Project/DATASET/')
     print(load[0])
     
