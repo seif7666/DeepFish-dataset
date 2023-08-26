@@ -28,14 +28,15 @@ class EstimatedDeepFish(Dataset):
         self.transform= transform
 
     def __getitem__(self, idx) -> dict:
-        if idx in [48,50]:
-            return self[random.randint(0,len(self)-1)]
         dictionary= self.__estimationLoader[idx]
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
         sample = {'img': dictionary['image'], 'annot': dictionary['annots'],'size':dictionary['size']}
         if self.transform:
             sample = self.transform(sample)
+        img= sample['img']
+        if img.shape[2]<img.shape[1]:
+            return random.randint(0,len(self.__estimationLoader))
         sample['size']= dictionary['size']
         sample['number']= dictionary['number']
         return sample

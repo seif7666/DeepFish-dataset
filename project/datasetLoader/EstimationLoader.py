@@ -5,19 +5,25 @@ from PIL import Image
 import numpy as np
 import torch
 import skimage
+import sklearn.preprocessing as pre
 
 class EstimationLoader:
     def __init__(self, path, dataset_path:str) -> None:
         self.__dataset= pd.read_csv(path)
         self.__DATASET_PATH= dataset_path
         self.__image_files=self.__dataset['file'].unique().tolist()
-
+        self.__encoder= pre.OrdinalEncoder()
+        uniques=np.array(self.__dataset['class'].unique()).reshape(-1,1)
+        # print()
+        self.__encoder.fit(uniques)
+        # print(self.__encoder.transform(np.array([['Pagrus pagrus']])))
         # self.__rename()
         self.__filter()
+        del self.__dataset['Unnamed: 0']
         print(self.__dataset.columns)
         
     def __filter(self):
-        self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
+        # self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
         self.__image_files=self.__dataset['file'].unique().tolist()
 
         deleted_files= []
@@ -68,7 +74,10 @@ class EstimationLoader:
             sizes[i,0]= annotations['size (cm)'].iloc[i]
         bboxes[:,2]+= bboxes[:,0]
         bboxes[:,3]+= bboxes[:,1]
-        bboxes[:,4]= 0
+        # print(annotations['class'])
+        classes=self.__encoder.transform(annotations['class'].to_numpy().reshape((-1,1)))
+        classes= torch.from_numpy(classes.flatten())
+        bboxes[:len(annotations),4]= classes
         
         return {
             'image': image,
@@ -89,5 +98,5 @@ class EstimationLoader:
         return img.astype(np.float32)/255.0
 if __name__ == '__main__':
     load= EstimationLoader('Project/size_estimation_homography_DeepFish.csv','Project/DATASET/')
-    print(load[0])
-    
+    for i in range(10):
+        print(load[i]['annots'][:,4])    
