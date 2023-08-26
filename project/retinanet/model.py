@@ -231,7 +231,8 @@ class ResNet(nn.Module):
     def forward(self, inputs):
 
         if self.training:
-            img_batch, annotations = inputs
+            img_batch, annotations,number = inputs
+            annotations= (annotations,number)
         else:
             img_batch = inputs
 
