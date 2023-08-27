@@ -221,6 +221,6 @@ class AspectRatioBasedSampler(Sampler):
 
 if __name__=='__main__':
     dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/',Compose([Normalizer(), Augmenter(), Resizer(480,480),Permuter()]))
-    # print(dataset[0])
-    dataloader= DataLoader(dataset,2)
-    print(next(iter(dataloader)))
+    print(dataset[0])
+    # dataloader= DataLoader(dataset,2)
+    # print(next(iter(dataloader)))
