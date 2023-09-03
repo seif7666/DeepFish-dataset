@@ -11,49 +11,61 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from torch.utils.data.sampler import Sampler
 from PIL import Image
-from torch.utils.data import Dataset,DataLoader
+from torch.utils.data import Dataset, DataLoader
+
 try:
     from .EstimationLoader import EstimationLoader
 except:
     from EstimationLoader import EstimationLoader
 import torch
 
-from torchvision.transforms import Compose,ToTensor,Resize
-import random 
+from torchvision.transforms import Compose, ToTensor, Resize
+import random
+
 
 class EstimatedDeepFish(Dataset):
-    def __init__(self, csv_path:str, dataset_path:str, transform=None) -> None:
+    def __init__(self, csv_path: str, dataset_path: str, transform=None) -> None:
         super().__init__()
-        self.__estimationLoader= EstimationLoader(csv_path,dataset_path)
-        self.transform= transform
+        self.__estimationLoader = EstimationLoader(csv_path, dataset_path)
+        self.transform = transform
 
     def __getitem__(self, idx) -> dict:
-        dictionary= self.__estimationLoader[idx]
+        from time import time
+
+        first = time()
+        dictionary = self.__estimationLoader[idx]
+        print(f"Loading Dictionary took {time()-first} seconds")
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
-        sample = {'img': dictionary['image'], 'annot': dictionary['annots'],'size':dictionary['size']}
+        sample = {
+            "img": dictionary["image"],
+            "annot": dictionary["annots"],
+            "size": dictionary["size"],
+        }
         if self.transform:
             sample = self.transform(sample)
-        
-        img= sample['img']
-        if img.shape[1]!=384 or img.shape[2]!=512:
-            return self[random.randint(0,len(self.__estimationLoader))]
-        sample['size']= dictionary['size']
-        sample['number']= dictionary['number']
+
+        second = time()
+        img = sample["img"]
+        print(f"Loading Image took {time()-second} seconds")
+        if img.shape[1] != 384 or img.shape[2] != 512:
+            return self[random.randint(0, len(self.__estimationLoader))]
+        sample["size"] = dictionary["size"]
+        sample["number"] = dictionary["number"]
         return sample
-    
+
     def num_classes(self):
         return self.__estimationLoader.getNumClasses()
+
     def __len__(self):
         return len(self.__estimationLoader)
 
 
 def collater(data):
+    imgs = [s["img"] for s in data]
+    annots = [s["annot"] for s in data]
+    scales = [s["scale"] for s in data]
 
-    imgs = [s['img'] for s in data]
-    annots = [s['annot'] for s in data]
-    scales = [s['scale'] for s in data]
-        
     widths = [int(s.shape[0]) for s in imgs]
     heights = [int(s.shape[1]) for s in imgs]
     batch_size = len(imgs)
@@ -65,39 +77,37 @@ def collater(data):
 
     for i in range(batch_size):
         img = imgs[i]
-        padded_imgs[i, :int(img.shape[0]), :int(img.shape[1]), :] = img
+        padded_imgs[i, : int(img.shape[0]), : int(img.shape[1]), :] = img
 
     max_num_annots = max(annot.shape[0] for annot in annots)
-    
-    if max_num_annots > 0:
 
+    if max_num_annots > 0:
         annot_padded = torch.ones((len(annots), max_num_annots, 5)) * -1
 
         if max_num_annots > 0:
             for idx, annot in enumerate(annots):
-                #print(annot.shape)
+                # print(annot.shape)
                 if annot.shape[0] > 0:
-                    annot_padded[idx, :annot.shape[0], :] = annot
+                    annot_padded[idx, : annot.shape[0], :] = annot
     else:
         annot_padded = torch.ones((len(annots), 1, 5)) * -1
 
-
     padded_imgs = padded_imgs.permute(0, 3, 1, 2)
 
-    return {'img': padded_imgs, 'annot': annot_padded, 'scale': scales}
+    return {"img": padded_imgs, "annot": annot_padded, "scale": scales}
+
 
 class Resizer(object):
     """Convert ndarrays in sample to Tensors."""
 
-    def __init__(self,min_side=608, max_side= 1024):
+    def __init__(self, min_side=608, max_side=1024):
         super().__init__()
-        self.minSide= min_side
-        self.maxSide= max_side
-
+        self.minSide = min_side
+        self.maxSide = max_side
 
     def __call__(self, sample):
-        min_side,max_side= self.minSide,self.maxSide
-        image, annots = sample['img'], sample['annot']
+        min_side, max_side = self.minSide, self.maxSide
+        image, annots = sample["img"], sample["annot"]
 
         rows, cols, cns = image.shape
 
@@ -114,58 +124,64 @@ class Resizer(object):
             scale = max_side / largest_side
 
         # resize the image with the computed scale
-        image = skimage.transform.resize(image, (int(round(rows*scale)), int(round((cols*scale)))))
+        image = skimage.transform.resize(
+            image, (int(round(rows * scale)), int(round((cols * scale))))
+        )
         rows, cols, cns = image.shape
 
-        pad_w = 32 - rows%32
-        pad_h = 32 - cols%32
+        pad_w = 32 - rows % 32
+        pad_h = 32 - cols % 32
 
         new_image = np.zeros((rows + pad_w, cols + pad_h, cns)).astype(np.float32)
         new_image[:rows, :cols, :] = image.astype(np.float32)
 
         annots[:, :4] *= scale
 
-        return {'img': torch.from_numpy(new_image), 'annot': annots, 'scale': scale}
+        return {"img": torch.from_numpy(new_image), "annot": annots, "scale": scale}
+
 
 class Permuter(object):
     def __call__(self, sample):
-        sample['img']=sample['img'].permute((2,0,1))
+        sample["img"] = sample["img"].permute((2, 0, 1))
         return sample
+
+
 class Augmenter(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample, flip_x=0.5):
-
         if np.random.rand() < flip_x:
-            image, annots = sample['img'], sample['annot']
+            image, annots = sample["img"], sample["annot"]
             image = image[:, ::-1, :]
 
             rows, cols, channels = image.shape
 
             x1 = annots[:, 0].clone()
             x2 = annots[:, 2].clone()
-            
+
             x_tmp = x1.clone()
 
             annots[:, 0] = cols - x2
             annots[:, 2] = cols - x_tmp
 
-            sample = {'img': image, 'annot': annots}
+            sample = {"img": image, "annot": annots}
 
         return sample
 
 
 class Normalizer(object):
-
     def __init__(self):
         self.mean = np.array([[[0.485, 0.456, 0.406]]])
         self.std = np.array([[[0.229, 0.224, 0.225]]])
 
     def __call__(self, sample):
+        image, annots = sample["img"], sample["annot"]
 
-        image, annots = sample['img'], sample['annot']
+        return {
+            "img": ((image.astype(np.float32) - self.mean) / self.std),
+            "annot": annots,
+        }
 
-        return {'img':((image.astype(np.float32)-self.mean)/self.std), 'annot': annots}
 
 class UnNormalizer(object):
     def __init__(self, mean=None, std=None):
@@ -191,7 +207,6 @@ class UnNormalizer(object):
 
 
 class AspectRatioBasedSampler(Sampler):
-
     def __init__(self, data_source, batch_size, drop_last):
         self.data_source = data_source
         self.batch_size = batch_size
@@ -215,12 +230,18 @@ class AspectRatioBasedSampler(Sampler):
         order.sort(key=lambda x: self.data_source.image_aspect_ratio(x))
 
         # divide into groups, one group = one batch
-        return [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
+        return [
+            [order[x % len(order)] for x in range(i, i + self.batch_size)]
+            for i in range(0, len(order), self.batch_size)
+        ]
 
 
-
-if __name__=='__main__':
-    dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/',Compose([Normalizer(), Augmenter(), Resizer(480,480),Permuter()]))
+if __name__ == "__main__":
+    dataset = EstimatedDeepFish(
+        "Project/size_estimation_homography_DeepFish.csv",
+        "Project/DATASET/",
+        Compose([Normalizer(), Augmenter(), Resizer(480, 480), Permuter()]),
+    )
     # print(dataset[0])
-    dataloader= DataLoader(dataset,2)
+    dataloader = DataLoader(dataset, 2)
     print(next(iter(dataloader)))

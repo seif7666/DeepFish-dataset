@@ -3,8 +3,6 @@ import re
 import os
 from PIL import Image
 import numpy as np
-import torch
-import sklearn.preprocessing as pre
 
 
 class EstimationLoader:
@@ -12,21 +10,16 @@ class EstimationLoader:
         self.__dataset = pd.read_csv(path)
         self.__DATASET_PATH = dataset_path
         self.__image_files = self.__dataset["file"].unique().tolist()
-        self.__encoder = pre.OrdinalEncoder()
-        uniques = np.array(self.__dataset["class"].unique()).reshape(-1, 1)
-        # print()
-        self.__encoder.fit(uniques)
-        # print(self.__encoder.transform(np.array([['Pagrus pagrus']])))
+
         # self.__rename()
         self.__filter()
-        del self.__dataset["Unnamed: 0"]
         print(self.__dataset.columns)
 
-    def getNumClasses(self):
-        return self.__encoder.categories_
-
     def __filter(self):
-        # self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
+        self.__dataset.drop(
+            self.__dataset[self.__dataset["class"] != "Pagrus pagrus"].index,
+            inplace=True,
+        )
         self.__image_files = self.__dataset["file"].unique().tolist()
 
         deleted_files = []
@@ -65,23 +58,11 @@ class EstimationLoader:
             self.__dataset.loc[i, "file"] = val
 
     def __getitem__(self, idx):
-        from time import time
-
-        first_time = time()
         filename = self.__image_files[idx]
-        second_time = time()
-        print(f"Loading {filename} took {second_time - first_time} seconds")
-        try:
-            image = self.__loadImage(filename + ".jpg")
-        except:
-            image = self.__loadImage(filename + ".JPG")
-
+        image = self.__loadImage(filename + ".jpg")
         annotations = self.__dataset.loc[self.__dataset["file"] == filename]
-        third_time = time()
-        print(f"Loading annotations took {third_time - second_time} seconds")
-        length = 32  # len(annotations)
-        bboxes = torch.zeros((length, 5))
-        sizes = torch.zeros((length, 1))
+        bboxes = np.zeros((13, 4))
+        sizes = np.zeros((13, 1))
         for i in range(len(annotations)):
             string = annotations["bbox"].iloc[i]
             string = string.split("]")[0].split("[")[1]
@@ -89,22 +70,10 @@ class EstimationLoader:
             for c in range(4):
                 bboxes[i, c] = float(nums[c])
             sizes[i, 0] = annotations["size (cm)"].iloc[i]
-        fourth_time = time()
-        print(f"Loading bboxes took {fourth_time - third_time} seconds")
-        bboxes[:, 2] += bboxes[:, 0]
-        bboxes[:, 3] += bboxes[:, 1]
-        # print(annotations['class'])
-        classes = self.__encoder.transform(
-            annotations["class"].to_numpy().reshape((-1, 1))
-        )
-        classes = torch.from_numpy(classes.flatten())
-        bboxes[: len(annotations), 4] = classes
-        fifth_time = time()
-        print(f"Loading classes took {fifth_time - fourth_time} seconds")
 
         return {
             "image": image,
-            "annots": bboxes,
+            "gt_bbox": bboxes,
             "size": sizes,
             "number": len(annotations),
         }
@@ -116,16 +85,9 @@ class EstimationLoader:
         return str(self.__dataset.columns)
 
     def __loadImage(self, path):
-        path = self.__DATASET_PATH + path
-        img = skimage.io.imread(path)
-        if len(img.shape) == 2:
-            img = skimage.color.gray2rgb(img)
-        return img.astype(np.float32) / 255.0
+        return Image.open(self.__DATASET_PATH + path)
 
 
 if __name__ == "__main__":
-    load = EstimationLoader(
-        "Project/size_estimation_homography_DeepFish.csv", "Project/DATASET/"
-    )
-    for i in range(10):
-        print(load[i]["annots"][:, 4])
+    load = EstimationLoader("size_estimation_homography_DeepFish.csv", "DATASET/")
+    print(load[0])
