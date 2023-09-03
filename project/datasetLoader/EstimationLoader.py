@@ -86,6 +86,9 @@ class EstimationLoader:
 
     def __loadImage(self, path):
         return Image.open(self.__DATASET_PATH + path)
+    
+    def getNumClasses(self):
+        return len(self.__dataset["class"].unique().tolist())
 
 
 if __name__ == "__main__":
