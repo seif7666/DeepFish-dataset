@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import torch
 import skimage
+from time import time
 import sklearn.preprocessing as pre
 
 class EstimationLoader:
@@ -66,18 +67,16 @@ class EstimationLoader:
 
         annotations= self.__dataset.loc[self.__dataset['file']==filename]
         length= 32#len(annotations)
-        bboxes= torch.zeros((length,5))
-        sizes= torch.zeros((length,1))
+        bboxes= torch.zeros((length,6))
         for i in range(len(annotations)):
             string= annotations['bbox'].iloc[i]
             string= string.split(']')[0].split('[')[1]
             nums= string.split(',')
             for c in range(4):
                 bboxes[i,c]=float(nums[c])
-            sizes[i,0]= annotations['size (cm)'].iloc[i]
+            bboxes[i,5]=annotations['size (cm)'].iloc[i]
         bboxes[:,2]+= bboxes[:,0]
         bboxes[:,3]+= bboxes[:,1]
-        # print(annotations['class'])
         classes=self.__encoder.transform(annotations['class'].to_numpy().reshape((-1,1)))
         classes= torch.from_numpy(classes.flatten())
         bboxes[:len(annotations),4]= classes
@@ -85,7 +84,6 @@ class EstimationLoader:
         return {
             'image': image,
             'annots': bboxes,
-            'size': sizes,
             'number': len(annotations)        
         }
     def __len__(self):
@@ -94,11 +92,13 @@ class EstimationLoader:
         return str(self.__dataset.columns)
     
     def __loadImage(self,path):
+        # current= time()
         path= self.__DATASET_PATH+path
         img = skimage.io.imread(path)
         if len(img.shape) == 2:
             img = skimage.color.gray2rgb(img)
-        return img.astype(np.float32)/255.0
+        # print(f'Loading time is {time()-current} seconds')
+        return torch.from_numpy(img)/255.0
 if __name__ == '__main__':
     load= EstimationLoader('Project/size_estimation_homography_DeepFish.csv','Project/DATASET/')
     for i in range(10):

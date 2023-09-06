@@ -6,6 +6,8 @@ import torch
 import numpy as np
 import random
 import csv
+import cv2
+from time import time
 import skimage
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
@@ -26,20 +28,25 @@ class EstimatedDeepFish(Dataset):
         super().__init__()
         self.__estimationLoader= EstimationLoader(csv_path,dataset_path)
         self.transform= transform
+        self.estimated_time= 0
+
+        
 
     def __getitem__(self, idx) -> dict:
+        # current= time()
         dictionary= self.__estimationLoader[idx]
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
-        sample = {'img': dictionary['image'], 'annot': dictionary['annots'],'size':dictionary['size']}
+        sample = {'img': dictionary['image'], 'annot': dictionary['annots']}
         if self.transform:
             sample = self.transform(sample)
         
         img= sample['img']
         if img.shape[1]!=384 or img.shape[2]!=512:
             return self[random.randint(0,len(self.__estimationLoader))]
-        sample['size']= dictionary['size']
         sample['number']= dictionary['number']
+        # self.estimated_time+=(time()-current)*1000
+        # print(f'Time taken is {time()-current} seconds')
         return sample
     
     def num_classes(self):
@@ -113,19 +120,23 @@ class Resizer(object):
         if largest_side * scale > max_side:
             scale = max_side / largest_side
 
+        # current=time()
         # resize the image with the computed scale
-        image = skimage.transform.resize(image, (int(round(rows*scale)), int(round((cols*scale)))))
+        image= cv2.resize(image,(int(round((cols*scale))),int(round(rows*scale))))
+        # image2 = skimage.transform.resize(image, (int(round(rows*scale)), int(round((cols*scale)))))
+        # print(np.average(image2-image1))
         rows, cols, cns = image.shape
+        # print(f'Resizer time is {time()-current} seconds')
 
         pad_w = 32 - rows%32
         pad_h = 32 - cols%32
 
-        new_image = np.zeros((rows + pad_w, cols + pad_h, cns)).astype(np.float32)
-        new_image[:rows, :cols, :] = image.astype(np.float32)
+        new_image = torch.zeros((rows + pad_w, cols + pad_h, cns))
+        new_image[:rows, :cols, :] = torch.from_numpy(image)
 
         annots[:, :4] *= scale
 
-        return {'img': torch.from_numpy(new_image), 'annot': annots, 'scale': scale}
+        return {'img': new_image, 'annot': annots, 'scale': scale}
 
 class Permuter(object):
     def __call__(self, sample):
@@ -150,7 +161,8 @@ class Augmenter(object):
             annots[:, 0] = cols - x2
             annots[:, 2] = cols - x_tmp
 
-            sample = {'img': image, 'annot': annots}
+            sample['img']= image
+            sample['annots']=annots
 
         return sample
 
@@ -158,14 +170,15 @@ class Augmenter(object):
 class Normalizer(object):
 
     def __init__(self):
-        self.mean = np.array([[[0.485, 0.456, 0.406]]])
-        self.std = np.array([[[0.229, 0.224, 0.225]]])
+        self.mean = torch.tensor([[[0.485, 0.456, 0.406]]])
+        self.std = torch.tensor([[[0.229, 0.224, 0.225]]])
 
     def __call__(self, sample):
-
-        image, annots = sample['img'], sample['annot']
-
-        return {'img':((image.astype(np.float32)-self.mean)/self.std), 'annot': annots}
+        # current= time()
+        sample['img]']=(sample['img']-self.mean)/self.std
+        sample['img']= sample['img'].numpy()
+        # print(f'Time taken in Normalizer is {time()-current} seconds')
+        return sample
 
 class UnNormalizer(object):
     def __init__(self, mean=None, std=None):
@@ -222,5 +235,6 @@ class AspectRatioBasedSampler(Sampler):
 if __name__=='__main__':
     dataset= EstimatedDeepFish('Project/size_estimation_homography_DeepFish.csv', 'Project/DATASET/',Compose([Normalizer(), Augmenter(), Resizer(480,480),Permuter()]))
     # print(dataset[0])
-    dataloader= DataLoader(dataset,2)
-    print(next(iter(dataloader)))
+    dataloader= DataLoader(dataset,8)
+    next(iter(dataloader))
+    print(f'Average time is {dataset.estimated_time/8}ms')
