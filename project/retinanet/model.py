@@ -84,6 +84,7 @@ class RegressionModel(nn.Module):
         self.output = nn.Conv2d(feature_size, num_anchors * 4, kernel_size=3, padding=1)
         self.outputSize= nn.Conv2d(feature_size,num_anchors,kernel_size=3,padding=1)
 
+
     def forward(self, x):
         out = self.conv1(x)
         out = self.act1(out)
@@ -105,8 +106,8 @@ class RegressionModel(nn.Module):
         out= out.view(out.shape[0],-1,4)
         out1= out1.permute(0, 2, 3, 1).contiguous()
         out1= out1.view(out1.shape[0],-1,1)
-        out= torch.hstack((out,out1))
-        print(out.shape)
+        out= torch.concat((out,out1),dim=2)
+        # print(out.shape)
         return out
 
 
