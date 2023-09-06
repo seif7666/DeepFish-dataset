@@ -1,10 +1,10 @@
 import torch.nn as nn
-from .model import resnet18
+from .model import resnet18,resnet34
 
 class PipelineModel(nn.Module):
     def __init__(self,num_classes):
         super().__init__()
-        self.detector= resnet18(num_classes=num_classes,pretrained=True)
+        self.detector= resnet34(num_classes=num_classes,pretrained=False)
 
     def forward(self,x):
         print(self.training)

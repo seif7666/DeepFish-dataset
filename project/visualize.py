@@ -15,7 +15,7 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
     # model.cuda()
     scores, classification, transformed_anchors = model(torch.unsqueeze(data['img'].cuda(),dim=0).float())
     print('Evaluation complete!')
-    idxs = np.where(scores.cpu()>0.5)
+    idxs = np.where(scores.cpu()>0.8)
     img = np.array(255 * unnormalize(data['img'][:, :, :])).copy()
     img[img<0] = 0
     img[img>255] = 255
@@ -28,8 +28,8 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
         y1 = int(bbox[1])
         x2 = int(bbox[2])
         y2 = int(bbox[3])
-        # print(scores[idxs[0][j]])
-        label_name = classes[int(classification[idxs[0][j]])]+" "+str(scores[idxs[0][j].item()])
+        # print(scores[idxs[0][j]].item())
+        label_name = classes[int(classification[idxs[0][j]])]+" "+str(scores[idxs[0][j]].item())
         draw_caption(img, (x1, y1, x2, y2), label_name)
 
         cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
@@ -50,7 +50,7 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
 def main():
     dataset=EstimatedDeepFish('./Project/size_estimation_homography_DeepFish.csv','./Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]))
     model= PipelineModel(len(dataset.num_classes()[0]))
-    model_params= torch.load('./model_final11.pt')
+    model_params= torch.load('./model_epoch73.pt')
     model.load_state_dict(model_params)
     model.cuda()
     print('Model is loaded!')
