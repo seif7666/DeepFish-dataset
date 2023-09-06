@@ -27,15 +27,19 @@ from time import time
 
 
 class EstimatedDeepFish(Dataset):
-    def __init__(self, csv_path: str, dataset_path: str, transform=None) -> None:
+    def __init__(
+        self, csv_path: str, dataset_path: str, transform=None, verbose=False
+    ) -> None:
         super().__init__()
         self.__estimationLoader = EstimationLoader(csv_path, dataset_path)
         self.transform = transform
+        self.verbose = verbose
 
     def __getitem__(self, idx) -> dict:
         first = time()
         dictionary = self.__estimationLoader[idx]
-        print(f"For getting from Loader: [{(time() - first):0.2f}] seconds", end="")
+        if self.verbose:
+            print(f"For getting from Loader: [{(time() - first):0.2f}] seconds", end="")
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
         sample = {
@@ -47,9 +51,10 @@ class EstimatedDeepFish(Dataset):
         if self.transform:
             sample = self.transform(sample)
 
-        print(
-            f" | After Transform Took: [{(time() - second):0.2f}] seconds for Index: {idx}"
-        )
+        if self.verbose:
+            print(
+                f" | After Transform Took: [{(time() - second):0.2f}] seconds for Index: {idx}"
+            )
 
         img = sample["img"]
         if img.shape[1] != 384 or img.shape[2] != 512:
