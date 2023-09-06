@@ -82,6 +82,7 @@ class RegressionModel(nn.Module):
         self.act4 = nn.ReLU()
 
         self.output = nn.Conv2d(feature_size, num_anchors * 4, kernel_size=3, padding=1)
+        self.outputSize= nn.Conv2d(feature_size,num_anchors,kernel_size=3,padding=1)
 
     def forward(self, x):
         out = self.conv1(x)
@@ -94,14 +95,19 @@ class RegressionModel(nn.Module):
         out = self.act3(out)
 
         out = self.conv4(out)
-        out = self.act4(out)
+        out0 = self.act4(out)
 
-        out = self.output(out)
+        out = self.output(out0)
+        out1= self.outputSize(out0)
 
         # out is B x C x W x H, with C = 4*num_anchors
-        out = out.permute(0, 2, 3, 1)
-
-        return out.contiguous().view(out.shape[0], -1, 4)
+        out = out.permute(0, 2, 3, 1).contiguous()
+        out= out.view(out.shape[0],-1,4)
+        out1= out1.permute(0, 2, 3, 1).contiguous()
+        out1= out1.view(out1.shape[0],-1,1)
+        out= torch.hstack((out,out1))
+        print(out.shape)
+        return out
 
 
 class ClassificationModel(nn.Module):

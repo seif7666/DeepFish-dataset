@@ -60,7 +60,7 @@ class EstimationLoader:
 
     def __getitem__(self,idx,show_file_name=True):
         filename= self.__image_files[idx]
-        print(filename)
+        # print(filename)
         try:
             image= self.__loadImage(filename+'.jpg')
         except:
