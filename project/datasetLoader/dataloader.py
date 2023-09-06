@@ -18,6 +18,8 @@ try:
 except:
     from EstimationLoader import EstimationLoader
 import torch
+from torchvision.transforms import functional as F
+from torchvision.transforms.functional import InterpolationMode
 
 from torchvision.transforms import Compose, ToTensor, Resize
 import random
@@ -101,45 +103,42 @@ def collater(data):
 class Resizer(object):
     """Convert ndarrays in sample to Tensors."""
 
-    def __init__(self, min_side=608, max_side=1024):
+    def __init__(
+        self,
+        size,
+        antialias,
+        min_side=608,
+        max_side=1024,
+        interpolation=InterpolationMode.BILINEAR,
+    ):
         super().__init__()
+        self.size = size
         self.minSide = min_side
         self.maxSide = max_side
+        self.interpolation = interpolation
+        self.antialias = antialias
 
     def __call__(self, sample):
-        first = time()
-        min_side, max_side = self.minSide, self.maxSide
-        image, annots = sample["img"], sample["annot"]
-
-        rows, cols, cns = image.shape
-
-        smallest_side = min(rows, cols)
-
-        # rescale the image so the smallest side is min_side
-        scale = min_side / smallest_side
-
-        # check if the largest side is now greater than max_side, which can happen
-        # when images have a large aspect ratio
-        largest_side = max(rows, cols)
-
-        if largest_side * scale > max_side:
-            scale = max_side / largest_side
-
-        # resize the image with the computed scale
-        image = skimage.transform.resize(
-            image, (int(round(rows * scale)), int(round((cols * scale))))
+        image = F.resize(
+            sample["img"],
+            self.size,
+            self.interpolation,
+            None,
+            self.antialias,
         )
-        rows, cols, cns = image.shape
+        return {"img": image, "annot": sample["annot"]}
 
-        pad_w = 32 - rows % 32
-        pad_h = 32 - cols % 32
 
-        new_image = np.zeros((rows + pad_w, cols + pad_h, cns)).astype(np.float32)
-        new_image[:rows, :cols, :] = image.astype(np.float32)
+class CustomPILToTensor:
+    def __init__(self) -> None:
+        pass
 
-        annots[:, :4] *= scale
+    def __call__(self, sample):
+        image = F.pil_to_tensor(sample["img"])
+        return {"img": F.convert_image_dtype(image), "annot": sample["annot"]}
 
-        return {"img": torch.from_numpy(new_image), "annot": annots, "scale": scale}
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
 
 class Permuter(object):
@@ -172,17 +171,14 @@ class Augmenter(object):
 
 
 class Normalizer(object):
-    def __init__(self):
-        self.mean = np.array([[[0.485, 0.456, 0.406]]])
-        self.std = np.array([[[0.229, 0.224, 0.225]]])
+    def __init__(self, mean, std, inplace=False):
+        self.mean = mean
+        self.std = std
+        self.inplace = inplace
 
     def __call__(self, sample):
-        image, annots = sample["img"], sample["annot"]
-
-        return {
-            "img": ((image.astype(np.float32) - self.mean) / self.std),
-            "annot": annots,
-        }
+        normalized = F.normalize(sample["img"], self.mean, self.std, self.inplace)
+        return {"img": normalized, "annot": sample["annot"]}
 
 
 class UnNormalizer(object):

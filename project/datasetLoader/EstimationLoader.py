@@ -106,7 +106,7 @@ class EstimationLoader:
 
     def __loadImage(self, path):
         path = self.__DATASET_PATH + path
-        return Image.open(path)
+        return Image.open(path).convert("RGB")
         # img = skimage.io.imread(path)
         # if len(img.shape) == 2:
         #     img = skimage.color.gray2rgb(img)
