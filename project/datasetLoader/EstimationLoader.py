@@ -58,8 +58,9 @@ class EstimationLoader:
             val= vals[0]+'-'+code+'.'+number+'.jpg'
             self.__dataset.loc[i,'file']= val
 
-    def __getitem__(self,idx):
+    def __getitem__(self,idx,show_file_name=True):
         filename= self.__image_files[idx]
+        print(filename)
         try:
             image= self.__loadImage(filename+'.jpg')
         except:
