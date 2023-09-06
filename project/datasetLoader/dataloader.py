@@ -33,7 +33,9 @@ class EstimatedDeepFish(Dataset):
         self.transform = transform
 
     def __getitem__(self, idx) -> dict:
+        first = time()
         dictionary = self.__estimationLoader[idx]
+        print(f"For getting from Loader: [{(time() - first):0.2f}] seconds", end="")
         # img = self.load_image(idx)
         # annot = self.load_annotations(idx)
         sample = {
@@ -44,6 +46,10 @@ class EstimatedDeepFish(Dataset):
         second = time()
         if self.transform:
             sample = self.transform(sample)
+
+        print(
+            f" | After Transform Took: [{(time() - second):0.2f}] seconds for Index: {idx}"
+        )
 
         img = sample["img"]
         if img.shape[1] != 384 or img.shape[2] != 512:
