@@ -30,6 +30,7 @@ class FocalLoss(nn.Module):
         batch_size = classifications.shape[0]
         classification_losses = []
         regression_losses = []
+        sizes_losses=[]
         annotations,numbers= annotations
 
         anchor = anchors[0, :, :]
@@ -159,7 +160,10 @@ class FocalLoss(nn.Module):
 
                 negative_indices = 1 + (~positive_indices)
 
-                regression_diff = torch.abs(targets - regression[positive_indices, :])
+                regression_diff = torch.abs(targets - regression[positive_indices, :4])
+                size_diff= (assigned_annotations[:,-1]- regression[positive_indices,-1])**2
+                sizes_losses.append(size_diff.mean())
+
 
                 regression_loss = torch.where(
                     torch.le(regression_diff, 1.0 / 9.0),
@@ -173,6 +177,6 @@ class FocalLoss(nn.Module):
                 else:
                     regression_losses.append(torch.tensor(0).float())
 
-        return torch.stack(classification_losses).mean(dim=0, keepdim=True), torch.stack(regression_losses).mean(dim=0, keepdim=True)
+        return torch.stack(classification_losses).mean(dim=0, keepdim=True), torch.stack(regression_losses).mean(dim=0, keepdim=True),torch.stack(sizes_losses).mean(dim=0, keepdim=True)
 
 
