@@ -119,11 +119,12 @@ class FocalLoss(nn.Module):
             # cls_loss = focal_weight * torch.pow(bce, gamma)
             cls_loss = focal_weight * bce
 
+
             if torch.cuda.is_available():
                 cls_loss = torch.where(torch.ne(targets, -1.0), cls_loss, torch.zeros(cls_loss.shape).cuda())
             else:
                 cls_loss = torch.where(torch.ne(targets, -1.0), cls_loss, torch.zeros(cls_loss.shape))
-
+            
             classification_losses.append(cls_loss.sum()/torch.clamp(num_positive_anchors.float(), min=1.0))
 
             # compute the loss for regression
@@ -160,10 +161,14 @@ class FocalLoss(nn.Module):
 
                 negative_indices = 1 + (~positive_indices)
 
-                regression_diff = torch.abs(targets - regression[positive_indices, :4])
-                size_diff= (assigned_annotations[:,-1]- regression[positive_indices,-1])**2
-                sizes_losses.append(size_diff.mean())
+                pagrus_weights= torch.ones_like(size_diff)
+                pagrus_weights[assigned_annotations[:,4]==5]= 5
+                pagrus_weights/=torch.sum(pagrus_weights)
 
+                regression_diff = torch.abs(targets - regression[positive_indices, :4])
+                size_diff= ((assigned_annotations[:,-1]- regression[positive_indices,-1])**2)/(assigned_annotations[:,-1]**2)
+                size_diff,regression_diff= size_diff*pagrus_weights,regression_diff*pagrus_weights
+                sizes_losses.append(size_diff.mean())
 
                 regression_loss = torch.where(
                     torch.le(regression_diff, 1.0 / 9.0),
