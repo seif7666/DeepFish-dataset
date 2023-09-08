@@ -15,31 +15,36 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
     # model.cuda()
     scores, classification, transformed_anchors = model(torch.unsqueeze(data['img'].cuda(),dim=0).float())
     print('Evaluation complete!')
-    idxs = np.where(scores.cpu()>0.8)
+    idxs = np.where(scores.cpu()>0.85)
     img = np.array(255 * unnormalize(data['img'][:, :, :])).copy()
     img[img<0] = 0
     img[img>255] = 255
-    img = np.transpose(img, (1, 2, 0))
+    img = np.transpose(img, (1, 2, 0)).astype(np.uint8)
+    cv2.imshow('Before',img)
     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB)
-    print(transformed_anchors)
+    # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+    
+    # print(transformed_anchors)
     for j in range(idxs[0].shape[0]):
         bbox = transformed_anchors[idxs[0][j], :]
         x1 = int(bbox[0])
         y1 = int(bbox[1])
         x2 = int(bbox[2])
         y2 = int(bbox[3])
+        print(f'Length is {bbox[4]}')
         # print(scores[idxs[0][j]].item())
-        label_name = classes[int(classification[idxs[0][j]])]+" "+str(scores[idxs[0][j]].item())
-        draw_caption(img, (x1, y1, x2, y2), label_name)
+        # label_name = classes[int(classification[idxs[0][j]])]+" "+str(scores[idxs[0][j]].item())
+        # draw_caption(img, (x1, y1, x2, y2), label_name)
 
-        cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
+        cv2.rectangle(img, (x1, y1), (x2, y2), color=(0,100+j*10 , 255//(j+1)), thickness=2)
         # print(label_name)
 
     number= data['number']
-    labels= data['annot'][:number,4].to(torch.int)
-    print(labels)
-    for i in labels:
-          print(classes[i])
+    lengths= data['annot'][:number,5].to(torch.int)
+    print(lengths)
+    # for i in lengths:
+        #   print(classes[i])
     cv2.imshow('img', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -48,9 +53,9 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
 
                
 def main():
-    dataset=EstimatedDeepFish('./Project/size_estimation_homography_DeepFish.csv','./Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]))
-    model= PipelineModel(len(dataset.num_classes()[0]))
-    model_params= torch.load('./model_epoch73.pt')
+    dataset=EstimatedDeepFish('../Project/size_estimation_homography_DeepFish.csv','../Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]),False)
+    model= PipelineModel(13)
+    model_params= torch.load('../bestModel.pt')
     model.load_state_dict(model_params)
     model.cuda()
     print('Model is loaded!')
