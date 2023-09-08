@@ -73,7 +73,20 @@ def main():
                    print(e)
                    break
 
+def test():
+    dataset=EstimatedDeepFish('../Project/size_estimation_homography_DeepFish.csv','../Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]),False)
+    dataloader= DataLoader(dataset,1)
+    data= next(iter(dataloader))
+    data['img'],data['annot']=data['img'].cuda(),data['annot'].cuda()
+    model= PipelineModel(13)
+    model_params= torch.load('../bestModel.pt')
+    model.load_state_dict(model_params)
+    model.train()
+    model.cuda()
+    model(data)
 
+      
 if __name__=='__main__':
-    main()
+    # main()
+    test()
     pass

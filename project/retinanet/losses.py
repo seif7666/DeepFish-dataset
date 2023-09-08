@@ -49,6 +49,7 @@ class FocalLoss(nn.Module):
             bbox_annotation = bbox_annotation[bbox_annotation[:, 4] != -1]
 
             classification = torch.clamp(classification, 1e-4, 1.0 - 1e-4)
+            # print(f'Classification is {classification.shape}')
 
             if bbox_annotation.shape[0] == 0:
                 if torch.cuda.is_available():
@@ -82,8 +83,9 @@ class FocalLoss(nn.Module):
                 continue
 
             IoU = calc_iou(anchors[0, :, :], bbox_annotation[:, :4]) # num_anchors x num_annotations
-
+            # print(f'IoU shape is {IoU.shape} and bbox annotations is {bbox_annotation.shape}')
             IoU_max, IoU_argmax = torch.max(IoU, dim=1) # num_anchors x 1
+
 
             #import pdb
             #pdb.set_trace()
@@ -97,6 +99,7 @@ class FocalLoss(nn.Module):
             targets[torch.lt(IoU_max, 0.7), :] = 0
 
             positive_indices = torch.ge(IoU_max, 0.8)
+            # print(torch.unique(positive_indices))
 
             num_positive_anchors = positive_indices.sum()
 
@@ -174,9 +177,14 @@ class FocalLoss(nn.Module):
                 regression_losses.append(regression_loss.mean())
             else:
                 if torch.cuda.is_available():
+                    sizes_losses.append(torch.tensor(0).float().cuda())
                     regression_losses.append(torch.tensor(0).float().cuda())
                 else:
+                    sizes_losses.append(torch.tensor(0).float())
                     regression_losses.append(torch.tensor(0).float())
+        # print(classification_losses)
+        # print(regression_losses)
+        # print(sizes_losses)
 
         return torch.stack(classification_losses).mean(dim=0, keepdim=True), torch.stack(regression_losses).mean(dim=0, keepdim=True),torch.stack(sizes_losses).mean(dim=0, keepdim=True)
 
