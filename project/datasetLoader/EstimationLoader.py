@@ -9,16 +9,16 @@ from time import time
 import sklearn.preprocessing as pre
 
 class EstimationLoader:
-    def __init__(self, path, dataset_path:str) -> None:
+    def __init__(self, path, dataset_path:str, for_train=True) -> None:
         self.__dataset= pd.read_csv(path)
         self.__DATASET_PATH= dataset_path
+        if not for_train:
+            print('Testing Dataset!')
+            self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
         self.__image_files=self.__dataset['file'].unique().tolist()
         self.__encoder= pre.OrdinalEncoder()
         uniques=np.array(self.__dataset['class'].unique()).reshape(-1,1)
-        # print()
         self.__encoder.fit(uniques)
-        # print(self.__encoder.transform(np.array([['Pagrus pagrus']])))
-        # self.__rename()
         self.__filter()
         del self.__dataset['Unnamed: 0']
         print(self.__dataset.columns)
@@ -27,9 +27,6 @@ class EstimationLoader:
         return self.__encoder.categories_
         
     def __filter(self):
-        # self.__dataset.drop(self.__dataset[self.__dataset['class'] != 'Pagrus pagrus'].index, inplace=True)
-        self.__image_files=self.__dataset['file'].unique().tolist()
-
         deleted_files= []
         for i in range(len(self.__image_files)):
             file= self.__image_files[i]

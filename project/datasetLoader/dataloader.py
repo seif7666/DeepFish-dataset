@@ -24,9 +24,9 @@ from torchvision.transforms import Compose,ToTensor,Resize
 import random 
 
 class EstimatedDeepFish(Dataset):
-    def __init__(self, csv_path:str, dataset_path:str, transform=None) -> None:
+    def __init__(self, csv_path:str, dataset_path:str, transform=None, for_train=True) -> None:
         super().__init__()
-        self.__estimationLoader= EstimationLoader(csv_path,dataset_path)
+        self.__estimationLoader= EstimationLoader(csv_path,dataset_path,for_train)
         self.transform= transform
         self.estimated_time= 0
 
