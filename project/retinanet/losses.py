@@ -164,9 +164,11 @@ class FocalLoss(nn.Module):
                 negative_indices = 1 + (~positive_indices)
 
                 regression_diff = torch.abs(targets - regression[positive_indices, :4])
-                size_diff= (assigned_annotations[:,-1]- regression[positive_indices,-1])/(assigned_annotations[:,-1])
-                size_diff=torch.sqrt(size_diff**2)
-                sizes_losses.append(size_diff.mean())
+
+                possible_error= 3
+                size_error= torch.abs(assigned_annotations[:,-1]- regression[positive_indices,-1]) - possible_error
+                size_error= torch.abs(size_error)/possible_error
+                sizes_losses.append(size_error.mean())
 
 
                 regression_loss = torch.where(
