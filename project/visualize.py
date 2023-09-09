@@ -76,7 +76,7 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
 def main():
     dataset=EstimatedDeepFish('../Project/size_estimation_homography_DeepFish.csv','../Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]),False)
     model= PipelineModel(13)
-    model_params= torch.load('../models/bestModel2.pt')
+    model_params= torch.load('../models/bestModel3.pt')
     model.load_state_dict(model_params)
     model.cuda()
     print('Model is loaded!')

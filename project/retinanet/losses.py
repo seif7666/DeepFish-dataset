@@ -96,9 +96,9 @@ class FocalLoss(nn.Module):
             if torch.cuda.is_available():
                 targets = targets.cuda()
 
-            targets[torch.lt(IoU_max, 0.7), :] = 0
+            targets[torch.lt(IoU_max, 0.4), :] = 0
 
-            positive_indices = torch.ge(IoU_max, 0.8)
+            positive_indices = torch.ge(IoU_max, 0.5)
             # print(torch.unique(positive_indices))
 
             num_positive_anchors = positive_indices.sum()
