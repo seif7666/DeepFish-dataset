@@ -74,9 +74,14 @@ class LengthHead(nn.Module):
         self.output= nn.Conv2d(512,out_size,kernel_size=3,padding=1)
     def forward(self,x):
         x=nn.functional.relu(self.conv1(x))
+        print(f'X shape after Conv1 is {x.shape}')
         x=nn.functional.relu(self.conv2(x))
+        print(f'X shape after Conv2 is {x.shape}')
         x=nn.functional.relu(self.conv3(x))
-        return self.output(x)
+        print(f'X shape after Conv3 is {x.shape}')
+        x=self.output(x)
+        print(f'X shape after Output is {x.shape}')
+        return x
 
 class RegressionModel(nn.Module):
     def __init__(self, num_features_in, num_anchors=9, feature_size=256):
@@ -112,6 +117,7 @@ class RegressionModel(nn.Module):
         out = self.conv4(out)
         out0 = self.act4(out)
 
+        print(f'Out0 shape: {out0.shape}')
         out = self.output(out0)
         out1= self.outputSize(out0)
 
