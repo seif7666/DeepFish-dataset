@@ -66,12 +66,12 @@ class PyramidFeatures(nn.Module):
 
 
 class LengthHead(nn.Module):
-    def __init__(self, feature_size, kernel_size) -> None:
+    def __init__(self, feature_size, out_size) -> None:
         super().__init__()
-        self.conv1= nn.Conv2d(feature_size,kernel_size,kernel_size=11,padding='same')
-        self.conv2= nn.Conv2d(feature_size,kernel_size,kernel_size=7,padding='same')
-        self.conv3= nn.Conv2d(feature_size,kernel_size,kernel_size=5,padding='same')
-        self.output= nn.Conv2d(feature_size,kernel_size,kernel_size=3,padding=1)
+        self.conv1= nn.Conv2d(feature_size,512,kernel_size=11,padding='same')
+        self.conv2= nn.Conv2d(512,512,kernel_size=7,padding='same')
+        self.conv3= nn.Conv2d(512,512,kernel_size=5,padding='same')
+        self.output= nn.Conv2d(512,out_size,kernel_size=3,padding=1)
     def forward(self,x):
         x=nn.functional.relu(self.conv1(x))
         x=nn.functional.relu(self.conv2(x))
