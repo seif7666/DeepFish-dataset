@@ -23,6 +23,10 @@ import torch
 from torchvision.transforms import Compose,ToTensor,Resize
 import random 
 
+
+def is_tensor(x)->bool:
+    return type(x)==torch.Tensor or type(x)==np.ndarray
+
 class EstimatedDeepFish(Dataset):
     def __init__(self, csv_path:str, dataset_path:str, transform=None, for_train=True) -> None:
         super().__init__()
@@ -101,56 +105,56 @@ class Resizer(object):
         self.minSide= min_side
         self.maxSide= max_side
 
-
-    def __call__(self, sample):
+    def __call_for_tensor(self,sample):
         min_side,max_side= self.minSide,self.maxSide
-        image, annots = sample['img'], sample['annot']
-
+        image= sample
         rows, cols, cns = image.shape
-
         smallest_side = min(rows, cols)
-
-        # rescale the image so the smallest side is min_side
         scale = min_side / smallest_side
-
-        # check if the largest side is now greater than max_side, which can happen
-        # when images have a large aspect ratio
         largest_side = max(rows, cols)
-
         if largest_side * scale > max_side:
             scale = max_side / largest_side
-
-        # current=time()
-        # resize the image with the computed scale
         image= cv2.resize(image,(int(round((cols*scale))),int(round(rows*scale))))
-        # image2 = skimage.transform.resize(image, (int(round(rows*scale)), int(round((cols*scale)))))
-        # print(np.average(image2-image1))
         rows, cols, cns = image.shape
-        # print(f'Resizer time is {time()-current} seconds')
-
         pad_w = 32 - rows%32
         pad_h = 32 - cols%32
-
         new_image = torch.zeros((rows + pad_w, cols + pad_h, cns))
         new_image[:rows, :cols, :] = torch.from_numpy(image)
+        return new_image
 
+    def __call__(self, sample):
+        if is_tensor(sample):
+            return self.__call_for_tensor(sample)
+        min_side,max_side= self.minSide,self.maxSide
+        image, annots = sample['img'], sample['annot']
+        rows, cols, cns = image.shape
+        smallest_side = min(rows, cols)
+        scale = min_side / smallest_side
+        largest_side = max(rows, cols)
+        if largest_side * scale > max_side:
+            scale = max_side / largest_side
+        image= cv2.resize(image,(int(round((cols*scale))),int(round(rows*scale))))
+        rows, cols, cns = image.shape
+        pad_w = 32 - rows%32
+        pad_h = 32 - cols%32
+        new_image = torch.zeros((rows + pad_w, cols + pad_h, cns))
+        new_image[:rows, :cols, :] = torch.from_numpy(image)
         annots[:, :4] *= scale
-
         return {'img': new_image, 'annot': annots, 'scale': scale}
 
 class Permuter(object):
     def __call__(self, sample):
+        if is_tensor(sample):
+            return sample.permute((2,0,1))
         sample['img']=sample['img'].permute((2,0,1))
         return sample
 class Augmenter(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample, flip_x=0.5):
-
         if np.random.rand() < flip_x:
             image, annots = sample['img'], sample['annot']
             image = image[:, ::-1, :]
-
             rows, cols, channels = image.shape
 
             x1 = annots[:, 0].clone()
@@ -174,10 +178,11 @@ class Normalizer(object):
         self.std = torch.tensor([[[0.229, 0.224, 0.225]]])
 
     def __call__(self, sample):
-        # current= time()
+        if is_tensor(sample):
+            sample= (sample-self.mean)/self.std
+            return sample.numpy()
         sample['img]']=(sample['img']-self.mean)/self.std
         sample['img']= sample['img'].numpy()
-        # print(f'Time taken in Normalizer is {time()-current} seconds')
         return sample
 
 class UnNormalizer(object):
@@ -230,6 +235,15 @@ class AspectRatioBasedSampler(Sampler):
         # divide into groups, one group = one batch
         return [[order[x % len(order)] for x in range(i, i + self.batch_size)] for i in range(0, len(order), self.batch_size)]
 
+
+
+def load_image(path):
+    modelTransform= transforms.Compose([Normalizer(), Resizer(480,480),Permuter()])
+    visionTransform= transforms.Compose([Resizer(480,480),Permuter()])
+    img = skimage.io.imread(path)
+    if len(img.shape) == 2:
+        img = skimage.color.gray2rgb(img)
+    return modelTransform(torch.from_numpy(img)/255.0), visionTransform(img)
 
 
 if __name__=='__main__':
