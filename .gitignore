@@ -10,3 +10,4 @@ venv/
 json/
 *.csv
 *.pth
+*.pt
