@@ -65,6 +65,19 @@ class PyramidFeatures(nn.Module):
         return [P3_x, P4_x, P5_x, P6_x, P7_x]
 
 
+class LengthHead(nn.Module):
+    def __init__(self, feature_size, kernel_size) -> None:
+        super().__init__()
+        self.conv1= nn.Conv2d(feature_size,kernel_size,kernel_size=11,padding='same')
+        self.conv2= nn.Conv2d(feature_size,kernel_size,kernel_size=7,padding='same')
+        self.conv3= nn.Conv2d(feature_size,kernel_size,kernel_size=5,padding='same')
+        self.output= nn.Conv2d(feature_size,kernel_size,kernel_size=3,padding=1)
+    def forward(self,x):
+        x=nn.functional.relu(self.conv1(x))
+        x=nn.functional.relu(self.conv2(x))
+        x=nn.functional.relu(self.conv3(x))
+        return self.output(x)
+
 class RegressionModel(nn.Module):
     def __init__(self, num_features_in, num_anchors=9, feature_size=256):
         super(RegressionModel, self).__init__()
@@ -82,7 +95,8 @@ class RegressionModel(nn.Module):
         self.act4 = nn.ReLU()
 
         self.output = nn.Conv2d(feature_size, num_anchors * 4, kernel_size=3, padding=1)
-        self.outputSize= nn.Conv2d(feature_size,num_anchors,kernel_size=3,padding=1)
+        # self.outputSize= nn.Conv2d(feature_size,num_anchors,kernel_size=3,padding=1)
+        self.outputSize= LengthHead(feature_size,num_anchors*4)
 
 
     def forward(self, x):
