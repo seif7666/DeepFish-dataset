@@ -13,9 +13,9 @@ def draw_caption(image, box, caption):
 
 def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np.ndarray):
     # model.cuda()
-    scores, classification, transformed_anchors = model(torch.unsqueeze(data['img'].cuda(),dim=0).float())
+    scores, classification, transformed_anchors = model(torch.unsqueeze(data['img'],dim=0).float())
     print('Evaluation complete!')
-    idxs = np.where(scores.cpu()>0.1)
+    idxs = np.where(scores.cpu()>0.8)
     print(scores)
     img = np.array(255 * unnormalize(data['img'][:, :, :])).copy()
     img[img<0] = 0
@@ -74,11 +74,11 @@ def evaluate(model:torch.nn.Module,data:dict,unnormalize:UnNormalizer,classes:np
 
                
 def main():
-    dataset=EstimatedDeepFish('../Project/size_estimation_homography_DeepFish.csv','../Project/DATASET/',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]),False)
+    dataset=EstimatedDeepFish('.\size_estimation_homography_DeepFish.csv','.\DATASET\\',transforms.Compose([Normalizer(), Resizer(480,480),Permuter()]),False)
     model= PipelineModel(13)
-    model_params= torch.load('../models/bestModel3.pt')
+    model_params= torch.load('..\\bestModel.pt',torch.device('cpu'))
     model.load_state_dict(model_params)
-    model.cuda()
+    # model.cuda()
     print('Model is loaded!')
     # dataloader= DataLoader(dataset,batch_size=4,num_workers=1)
     model.eval()
@@ -88,6 +88,7 @@ def main():
                 index= int(input('Enter an index: ')) % len(dataset)
                 data= dataset[index]
                 print('Data loaded successfully')
+                print(data['img'].sum())
                 evaluate(model,data,unnormalize,dataset.num_classes()[0])
             except Exception as e:
                    e.with_traceback()

@@ -179,9 +179,9 @@ class Normalizer(object):
 
     def __call__(self, sample):
         if is_tensor(sample):
-            sample= (sample-self.mean)/self.std
+            # sample= (sample-self.mean)/self.std
             return sample.numpy()
-        sample['img]']=(sample['img']-self.mean)/self.std
+        # sample['img]']=(sample['img']-self.mean)/self.std
         sample['img']= sample['img'].numpy()
         return sample
 
@@ -239,7 +239,7 @@ class AspectRatioBasedSampler(Sampler):
 
 def load_image(path):
     modelTransform= transforms.Compose([Normalizer(), Resizer(480,480),Permuter()])
-    visionTransform= transforms.Compose([Resizer(480,480),Permuter()])
+    visionTransform= transforms.Compose([Resizer(480,480)])
     img = skimage.io.imread(path)
     if len(img.shape) == 2:
         img = skimage.color.gray2rgb(img)
