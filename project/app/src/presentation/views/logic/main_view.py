@@ -1,4 +1,5 @@
 import os
+from typing import List
 from PySide6.QtWidgets import QMainWindow, QFileDialog
 from PySide6.QtGui import QPixmap
 from app.src.presentation.views.ui.main_view import Ui_deep_fish_window as View
@@ -29,6 +30,7 @@ class MainView(QMainWindow, View):
         if image == "":
             return
         self.proxy.load_image(image)
+        self.__set_max(self.proxy.get_predictions())
         self.__display_image(image)
 
     def display_all(self) -> None:
@@ -40,6 +42,9 @@ class MainView(QMainWindow, View):
 
     def bounding_boxes_changed(self) -> None:
         pass  # TODO: Change boxes Number and Display Image
+
+    def __set_max(self, predictions: List[int]) -> None:
+        self.bounding_box_number_spinbox.setMaximum(len(predictions))
 
     def __display_image(self, image_path: str) -> None:
         self.image_label.setPixmap(QPixmap(image_path).scaled(self.image_label.size()))
