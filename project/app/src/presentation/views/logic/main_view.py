@@ -42,5 +42,4 @@ class MainView(QMainWindow, View):
         pass  # TODO: Change boxes Number and Display Image
 
     def __display_image(self, image_path: str) -> None:
-        pixmap = QPixmap(image_path)
-        self.image_label.setPixmap(pixmap.scaled(self.image_label.size()))
+        self.image_label.setPixmap(QPixmap(image_path).scaled(self.image_label.size()))

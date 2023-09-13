@@ -8,122 +8,161 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QFrame,
-    QHBoxLayout, QLabel, QMainWindow, QPushButton,
-    QSizePolicy, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtCore import (
+    QCoreApplication,
+    QDate,
+    QDateTime,
+    QLocale,
+    QMetaObject,
+    QObject,
+    QPoint,
+    QRect,
+    QSize,
+    QTime,
+    QUrl,
+    Qt,
+)
+from PySide6.QtGui import (
+    QBrush,
+    QColor,
+    QConicalGradient,
+    QCursor,
+    QFont,
+    QFontDatabase,
+    QGradient,
+    QIcon,
+    QImage,
+    QKeySequence,
+    QLinearGradient,
+    QPainter,
+    QPalette,
+    QPixmap,
+    QRadialGradient,
+    QTransform,
+)
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QDoubleSpinBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QSizePolicy,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class Ui_deep_fish_window(object):
     def setupUi(self, deep_fish_window):
         if not deep_fish_window.objectName():
-            deep_fish_window.setObjectName(u"deep_fish_window")
+            deep_fish_window.setObjectName("deep_fish_window")
         deep_fish_window.resize(1006, 736)
-        deep_fish_window.setStyleSheet(u"#deep_fish_window{\n"
-"	background-color: #FFFFFF;\n"
-"}\n"
-"\n"
-"*{\n"
-"	color: #000000;\n"
-"}\n"
-"\n"
-"QFrame{\n"
-"	border: none;\n"
-"}\n"
-"QLabel{\n"
-"	font-size: 20px;\n"
-"}\n"
-"\n"
-"QCheckBox{\n"
-"	font-size: 20px;\n"
-"}\n"
-"\n"
-"QPushButton{\n"
-"	font-size: 20px;\n"
-"	border: 1px solid;\n"
-"	border-radius: 10px;\n"
-"	color: white;\n"
-"	background-color: rgba(255, 34, 61, 202);\n"
-"}\n"
-"\n"
-"QPushButton:hover{\n"
-"	border: 2px solid;\n"
-"	font-weight: 900;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox{\n"
-"	font-size: 20px;\n"
-"	border: 0.5px solid;\n"
-"	border-radius: 4px;\n"
-"	padding: 8px;\n"
-"	margin: 8px;\n"
-"	background-color: #FFFFFF;\n"
-"}\n"
-"\n"
-"QDoubleSpinBox:focus{\n"
-"	border: 1px solid;\n"
-"}\n"
-"\n"
-"QSpinBox:focus{\n"
-"	border: 1px solid;\n"
-"}\n"
-"\n"
-"QSpinBox{\n"
-"	font-size: 20px;\n"
-"	border: 0.5px solid;\n"
-"	border-radius: 4px;\n"
-"	padding: 8px;\n"
-"	margin: 8px;\n"
-"	background-color: #FFFFFF;\n"
-"}\n"
-"\n"
-"#image_frame{\n"
-"	border: 1px solid;\n"
-"	border-radius: 20px;\n"
-"}")
+        deep_fish_window.setStyleSheet(
+            "#deep_fish_window{\n"
+            "	background-color: #FFFFFF;\n"
+            "}\n"
+            "\n"
+            "*{\n"
+            "	color: #000000;\n"
+            "}\n"
+            "\n"
+            "QFrame{\n"
+            "	border: none;\n"
+            "}\n"
+            "QLabel{\n"
+            "	font-size: 20px;\n"
+            "}\n"
+            "\n"
+            "QCheckBox{\n"
+            "	font-size: 20px;\n"
+            "}\n"
+            "\n"
+            "QPushButton{\n"
+            "	font-size: 20px;\n"
+            "	border: 1px solid;\n"
+            "	border-radius: 10px;\n"
+            "	color: white;\n"
+            "	background-color: rgba(255, 34, 61, 202);\n"
+            "}\n"
+            "\n"
+            "QPushButton:hover{\n"
+            "	border: 2px solid;\n"
+            "	font-weight: 900;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox{\n"
+            "	font-size: 20px;\n"
+            "	border: 0.5px solid;\n"
+            "	border-radius: 4px;\n"
+            "	padding: 8px;\n"
+            "	margin: 8px;\n"
+            "	background-color: #FFFFFF;\n"
+            "}\n"
+            "\n"
+            "QDoubleSpinBox:focus{\n"
+            "	border: 1px solid;\n"
+            "}\n"
+            "\n"
+            "QSpinBox:focus{\n"
+            "	border: 1px solid;\n"
+            "}\n"
+            "\n"
+            "QSpinBox{\n"
+            "	font-size: 20px;\n"
+            "	border: 0.5px solid;\n"
+            "	border-radius: 4px;\n"
+            "	padding: 8px;\n"
+            "	margin: 8px;\n"
+            "	background-color: #FFFFFF;\n"
+            "}\n"
+            "\n"
+            "#image_frame{\n"
+            "	border: 1px solid;\n"
+            "	border-radius: 20px;\n"
+            "}"
+        )
         self.centralwidget = QWidget(deep_fish_window)
-        self.centralwidget.setObjectName(u"centralwidget")
+        self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setSpacing(5)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setContentsMargins(10, 25, 25, 25)
         self.control_frame = QFrame(self.centralwidget)
-        self.control_frame.setObjectName(u"control_frame")
+        self.control_frame.setObjectName("control_frame")
         self.control_frame.setMaximumSize(QSize(500, 16777215))
         self.control_frame.setFrameShape(QFrame.StyledPanel)
         self.control_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.control_frame)
         self.verticalLayout.setSpacing(0)
-        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setObjectName("verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.control_inner_frame = QFrame(self.control_frame)
-        self.control_inner_frame.setObjectName(u"control_inner_frame")
+        self.control_inner_frame.setObjectName("control_inner_frame")
         self.control_inner_frame.setFrameShape(QFrame.StyledPanel)
         self.control_inner_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.control_inner_frame)
         self.verticalLayout_2.setSpacing(10)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(10, 0, 10, 0)
         self.smallest_score_frame = QFrame(self.control_inner_frame)
-        self.smallest_score_frame.setObjectName(u"smallest_score_frame")
+        self.smallest_score_frame.setObjectName("smallest_score_frame")
         self.smallest_score_frame.setFrameShape(QFrame.StyledPanel)
         self.smallest_score_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_3 = QHBoxLayout(self.smallest_score_frame)
         self.horizontalLayout_3.setSpacing(5)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.smallest_score_label = QLabel(self.smallest_score_frame)
-        self.smallest_score_label.setObjectName(u"smallest_score_label")
+        self.smallest_score_label.setObjectName("smallest_score_label")
 
         self.horizontalLayout_3.addWidget(self.smallest_score_label, 0, Qt.AlignLeft)
 
         self.smallest_score_spinbox = QDoubleSpinBox(self.smallest_score_frame)
-        self.smallest_score_spinbox.setObjectName(u"smallest_score_spinbox")
+        self.smallest_score_spinbox.setObjectName("smallest_score_spinbox")
         self.smallest_score_spinbox.setCursor(QCursor(Qt.PointingHandCursor))
         self.smallest_score_spinbox.setMaximum(1.000000000000000)
         self.smallest_score_spinbox.setSingleStep(0.100000000000000)
@@ -131,74 +170,73 @@ class Ui_deep_fish_window(object):
 
         self.horizontalLayout_3.addWidget(self.smallest_score_spinbox)
 
-
         self.verticalLayout_2.addWidget(self.smallest_score_frame)
 
         self.bounding_box_number_frame = QFrame(self.control_inner_frame)
-        self.bounding_box_number_frame.setObjectName(u"bounding_box_number_frame")
+        self.bounding_box_number_frame.setObjectName("bounding_box_number_frame")
         self.bounding_box_number_frame.setFrameShape(QFrame.StyledPanel)
         self.bounding_box_number_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_4 = QHBoxLayout(self.bounding_box_number_frame)
         self.horizontalLayout_4.setSpacing(5)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.bounding_box_number_label = QLabel(self.bounding_box_number_frame)
-        self.bounding_box_number_label.setObjectName(u"bounding_box_number_label")
+        self.bounding_box_number_label.setObjectName("bounding_box_number_label")
 
-        self.horizontalLayout_4.addWidget(self.bounding_box_number_label, 0, Qt.AlignLeft)
+        self.horizontalLayout_4.addWidget(
+            self.bounding_box_number_label, 0, Qt.AlignLeft
+        )
 
         self.bounding_box_number_spinbox = QSpinBox(self.bounding_box_number_frame)
-        self.bounding_box_number_spinbox.setObjectName(u"bounding_box_number_spinbox")
+        self.bounding_box_number_spinbox.setObjectName("bounding_box_number_spinbox")
         self.bounding_box_number_spinbox.setCursor(QCursor(Qt.PointingHandCursor))
         self.bounding_box_number_spinbox.setMaximum(10)
 
         self.horizontalLayout_4.addWidget(self.bounding_box_number_spinbox)
 
-
         self.verticalLayout_2.addWidget(self.bounding_box_number_frame)
 
         self.display_all_frame = QFrame(self.control_inner_frame)
-        self.display_all_frame.setObjectName(u"display_all_frame")
+        self.display_all_frame.setObjectName("display_all_frame")
         self.display_all_frame.setFrameShape(QFrame.StyledPanel)
         self.display_all_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_5 = QHBoxLayout(self.display_all_frame)
         self.horizontalLayout_5.setSpacing(5)
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.display_all_check_box = QCheckBox(self.display_all_frame)
-        self.display_all_check_box.setObjectName(u"display_all_check_box")
+        self.display_all_check_box.setObjectName("display_all_check_box")
         self.display_all_check_box.setCursor(QCursor(Qt.PointingHandCursor))
 
-        self.horizontalLayout_5.addWidget(self.display_all_check_box, 0, Qt.AlignHCenter)
-
+        self.horizontalLayout_5.addWidget(
+            self.display_all_check_box, 0, Qt.AlignHCenter
+        )
 
         self.verticalLayout_2.addWidget(self.display_all_frame)
-
 
         self.verticalLayout.addWidget(self.control_inner_frame)
 
         self.select_image_button = QPushButton(self.control_frame)
-        self.select_image_button.setObjectName(u"select_image_button")
+        self.select_image_button.setObjectName("select_image_button")
         self.select_image_button.setMinimumSize(QSize(0, 50))
         self.select_image_button.setMaximumSize(QSize(16777215, 16777215))
         self.select_image_button.setCursor(QCursor(Qt.PointingHandCursor))
 
         self.verticalLayout.addWidget(self.select_image_button)
 
-
         self.horizontalLayout.addWidget(self.control_frame)
 
         self.image_frame = QFrame(self.centralwidget)
-        self.image_frame.setObjectName(u"image_frame")
+        self.image_frame.setObjectName("image_frame")
         self.image_frame.setMinimumSize(QSize(0, 0))
         self.image_frame.setFrameShape(QFrame.StyledPanel)
         self.image_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.image_frame)
         self.horizontalLayout_2.setSpacing(5)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.image_label = QLabel(self.image_frame)
-        self.image_label.setObjectName(u"image_label")
+        self.image_label.setObjectName("image_label")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -209,7 +247,6 @@ class Ui_deep_fish_window(object):
 
         self.horizontalLayout_2.addWidget(self.image_label)
 
-
         self.horizontalLayout.addWidget(self.image_frame)
 
         deep_fish_window.setCentralWidget(self.centralwidget)
@@ -217,14 +254,27 @@ class Ui_deep_fish_window(object):
         self.retranslateUi(deep_fish_window)
 
         QMetaObject.connectSlotsByName(deep_fish_window)
+
     # setupUi
 
     def retranslateUi(self, deep_fish_window):
-        deep_fish_window.setWindowTitle(QCoreApplication.translate("deep_fish_window", u"MainWindow", None))
-        self.smallest_score_label.setText(QCoreApplication.translate("deep_fish_window", u"Smallest Score", None))
-        self.bounding_box_number_label.setText(QCoreApplication.translate("deep_fish_window", u"Bounding Box Numbers", None))
-        self.display_all_check_box.setText(QCoreApplication.translate("deep_fish_window", u"Display All", None))
-        self.select_image_button.setText(QCoreApplication.translate("deep_fish_window", u"Select Image", None))
-        self.image_label.setText(QCoreApplication.translate("deep_fish_window", u"No Image", None))
-    # retranslateUi
+        deep_fish_window.setWindowTitle(
+            QCoreApplication.translate("deep_fish_window", "MainWindow", None)
+        )
+        self.smallest_score_label.setText(
+            QCoreApplication.translate("deep_fish_window", "Smallest Score", None)
+        )
+        self.bounding_box_number_label.setText(
+            QCoreApplication.translate("deep_fish_window", "Bounding Box Numbers", None)
+        )
+        self.display_all_check_box.setText(
+            QCoreApplication.translate("deep_fish_window", "Display All", None)
+        )
+        self.select_image_button.setText(
+            QCoreApplication.translate("deep_fish_window", "Select Image", None)
+        )
+        self.image_label.setText(
+            QCoreApplication.translate("deep_fish_window", "No Image", None)
+        )
 
+    # retranslateUi
