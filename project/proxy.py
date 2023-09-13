@@ -5,13 +5,14 @@ from datasetLoader.dataloader import load_image
 import numpy as np
 import cv2
 import pandas as pd
+from torchsummary import summary
+import random
 
-
-def draw_caption(image, p1,p2, caption):
+def draw_caption(image, p1,p2, caption, color):
     b=np.array([p1[0],p1[1],p2[0],p2[1]],dtype=int)
-    print(b)
-    cv2.putText(image, str(caption), (((b[0]+b[0])//2), (2*b[1]+b[3])//3), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
-    cv2.putText(image, str(caption), (((b[0]+b[0])//2), (2*b[1]+b[3])//3), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
+    # print(b)
+    cv2.putText(image, str(caption), (((b[0]+b[0])//2), (2*b[1]+b[3])//3), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,255), 2)
+    cv2.putText(image, str(caption), (((b[0]+b[0])//2), (2*b[1]+b[3])//3), cv2.FONT_HERSHEY_PLAIN, 1, color, 1)
 
 class ModelProxy:
     DEVICE= 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -26,9 +27,11 @@ class ModelProxy:
             torch.set_grad_enabled(False)
             state_dict= torch.load('..\\bestModel.pt',torch.device(ModelProxy.DEVICE))
             self.__model= PipelineModel(13)
+            print(self.__model.detector.regressionModel)
             self.__model.to(ModelProxy.DEVICE)
             self.__model.load_state_dict(state_dict)
             self.__model.eval()
+            # print(self.__model)
         except Exception as e:
             self.__error_message= f'Failed initiating the model\n\n{e}'
             self.get_error_message()
@@ -60,7 +63,7 @@ class ModelProxy:
             columns=predictions.columns[1:]
             predictions[columns]= predictions[columns].astype(int)
             self.__model_predictions=predictions
-            print(self.__model_predictions)
+            # print(self.__model_predictions)
             return True
         except Exception as e:
             e.with_traceback()
@@ -85,20 +88,23 @@ class ModelProxy:
         return cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
 
     def __draw_on_image(self,image,point1,point2,size):
-        draw_caption(image, point1,point2, size)
-        cv2.rectangle(image, point1, point2, color=(0,0,255), thickness=2)
+        color= (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+        draw_caption(image, point1,point2, size,color)
+        cv2.rectangle(image, point1, point2, color=color, thickness=3)
 
     def get_error_message(self)->str:
         print(self.__error_message)
 
 if __name__=='__main__':
     model= ModelProxy()
-    model.load_image('D:\Personal\Torpedo\Deepfish\Project\DATASET\\29_04_21-B21.jpg')
-    print(model.get_scores())
-    cv2.imshow('BOX',model.get_image([10]))
-    # model.display_img()
+    paths= ['D:\Personal\Torpedo\Deepfish\Project\DATASET\\29_04_21-B22.jpg','D:\Personal\Torpedo\Deepfish\Project\DATASET\\29_04_21-B21.jpg']
+    predictions= [[0,1,2,3,4],[0,1,2,3]]
+    for i,path in enumerate(paths):
+        model.load_image(path)
+        cv2.imshow(f'Prediction{i}',model.get_image(predictions[i]))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    
 
 
 
