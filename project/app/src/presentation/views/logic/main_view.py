@@ -11,7 +11,7 @@ from proxy import ModelProxy
 class MainView(QMainWindow, View):
     def __init__(self, proxy: ModelProxy, parent=None) -> None:
         super().__init__(parent)
-        self.proxy = ModelProxy()
+        self.proxy = proxy
         self.score = 0.5
         self.bbox_number = 0
         self.setupUi(self)
@@ -26,30 +26,6 @@ class MainView(QMainWindow, View):
             self.bounding_boxes_changed
         )
 
-    def select_image(self) -> None:
-        image = QFileDialog.getOpenFileName(
-            self, "Select Image", os.getcwd(), "Images (*.jpg *.JPEG *.JPG *.png)"
-        )[0]
-        if image == "":
-            return
-        self.__load_image(image)
-
-    def display_all(self) -> None:
-        if self.display_all_check_box.isChecked():
-            self.image = self.proxy.show_all_bboxes(self.score)
-            self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
-
-    def score_changed(self) -> None:
-        self.score = self.smallest_score_spinbox.value()
-        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
-        self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
-        self.__reset()
-
-    def bounding_boxes_changed(self) -> None:
-        self.bbox_number = self.bounding_box_number_spinbox.value()
-        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
-        self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
-
     def __load_image(self, image_path: str) -> None:
         self.proxy.load_image(image_path)
         self.__set_max(self.proxy.get_bbox_number(self.score))
@@ -62,6 +38,36 @@ class MainView(QMainWindow, View):
         self.image_label.setPixmap(QPixmap(image_path).scaled(self.image_label.size()))
 
     def __reset(self) -> None:
+        self.bbox_number = 0
         self.__set_max(self.proxy.get_bbox_number(self.score))
-        self.display_all_check_box.setChecked(False)
         self.bounding_box_number_spinbox.setValue(0)
+
+    def __update(self) -> None:
+        if self.display_all_check_box.isChecked():
+            self.bounding_box_number_spinbox.setDisabled(True)
+            self.image = self.proxy.show_all_bboxes(self.score)
+        else:
+            self.bounding_box_number_spinbox.setDisabled(False)
+        self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
+
+    def select_image(self) -> None:
+        image = QFileDialog.getOpenFileName(
+            self, "Select Image", os.getcwd(), "Images (*.jpg *.JPEG *.JPG *.png)"
+        )[0]
+        if image == "":
+            return
+        self.__load_image(image)
+
+    def display_all(self) -> None:
+        self.__update()
+
+    def score_changed(self) -> None:
+        self.score = self.smallest_score_spinbox.value()
+        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
+        self.__reset()
+        self.__update()
+
+    def bounding_boxes_changed(self) -> None:
+        self.bbox_number = self.bounding_box_number_spinbox.value()
+        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
+        self.__update()
