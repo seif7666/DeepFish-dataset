@@ -23,12 +23,47 @@ class ModelProxy:
     def load_image(self, image_path) -> bool:
         try:
             input_tensor, self.__original_image = load_image(image_path)
-            input_tensor: torch.Tensor = input_tensor
-            # print(input_tensor.sum())
             self.__original_image = self.__original_image.numpy().astype(np.uint8)
             scores, classification, transformed_anchors = self.__model(
                 torch.unsqueeze(input_tensor.to(ModelProxy.DEVICE), dim=0).float()
             )
+            self.__set_model_predictions(scores,classification,transformed_anchors)
+            return True
+        except Exception as e:
+            e.with_traceback()
+            self.__error_message = e
+            self.get_error_message()
+            return False
+    
+
+    def get_bbox_number(self,probability:float):
+        return len(self.__filter_by_prob(probability))
+    
+    def show_certain_bbox(self,idx:int,probability:float) -> np.ndarray:
+        row= self.__filter_by_prob(probability).iloc[idx]
+        img= self.__original_image.copy()
+        self.__annotate_image(row,img)
+        return img
+    
+    def show_all_bboxes(self,probability:float):
+        rows= self.__filter_by_prob(probability)
+        img= self.__original_image.copy()
+        for i in range(len(rows)):
+            self.__annotate_image(rows.iloc[i],img)
+        return img
+
+
+    def get_error_message(self) -> str:
+        print(self.__error_message)
+
+    def __annotate_image(self,row:pd.DataFrame,img:np.ndarray)->None:
+        point1= (int(row['X1']),int(row['Y1']))
+        point2= (int(row['X2']),int(row['Y2']))
+        size=row['size']
+        self.__draw_on_image(img,point1,point2,size)
+
+
+    def __set_model_predictions(self,scores, classification, transformed_anchors):
             transformed_anchors = transformed_anchors.numpy()
             predictions = pd.DataFrame(
                 {
@@ -49,38 +84,6 @@ class ModelProxy:
             columns=predictions.columns[1:]
             predictions[columns]= predictions[columns].astype(int)
             self.__model_predictions=predictions
-            return True
-        except Exception as e:
-            e.with_traceback()
-            self.__error_message = e
-            self.get_error_message()
-            return False
-    
-
-    def get_bbox_number(self,probability:float):
-        return len(self.__filter_by_prob(probability))
-    def show_certain_bbox(self,idx:int,probability:float) -> np.ndarray:
-        row= self.__filter_by_prob(probability).iloc[idx]
-        img= self.__original_image.copy()
-        self.__annotate_image(row,img)
-        return cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-    def show_all_bboxes(self,probability:float):
-        rows= self.__filter_by_prob(probability)
-        img= self.__original_image.copy()
-        for i in range(len(rows)):
-            self.__annotate_image(rows.iloc[i],img)
-        return cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-
-
-    def get_error_message(self) -> str:
-        print(self.__error_message)
-
-    def __annotate_image(self,row:pd.DataFrame,img:np.ndarray)->None:
-        point1= (int(row['X1']),int(row['Y1']))
-        point2= (int(row['X2']),int(row['Y2']))
-        size=row['size']
-        self.__draw_on_image(img,point1,point2,size)
-
 
     def __filter_by_prob(self,probability:float):
         return self.__model_predictions.loc[self.__model_predictions['scores']>= probability]
