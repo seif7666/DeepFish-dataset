@@ -10,35 +10,39 @@ import random
 
 
 class ModelProxy:
-    DEVICE= 'cuda' if torch.cuda.is_available() else 'cpu'
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
     def __init__(self) -> None:
-        self.__model= None
+        self.__model = None
         self.__set_model()
         self.__original_image=None
         self.__error_message=''
         self.__model_predictions=None
     
 
-    def load_image(self,image_path)->bool:
+    def load_image(self, image_path) -> bool:
         try:
-            input_tensor,self.__original_image= load_image(image_path)
-            input_tensor: torch.Tensor= input_tensor
-            print(input_tensor.sum())
-            self.__original_image= self.__original_image.numpy().astype(np.uint8)
-            scores, classification, transformed_anchors =\
-                            self.__model(torch.unsqueeze(input_tensor.to(ModelProxy.DEVICE),dim=0).float())
-            transformed_anchors=transformed_anchors.numpy()
-            predictions= pd.DataFrame({
-               'scores': scores.numpy(),
-               'class': classification.numpy(),
-               'X1':transformed_anchors[:,0],
-               'Y1':transformed_anchors[:,1],
-               'X2':transformed_anchors[:,2],
-               'Y2':transformed_anchors[:,3],
-               'size':transformed_anchors[:,4] 
-            })
-            predictions=predictions.loc[predictions['class']==5]
-            predictions.drop('class',axis=1,inplace=True)
+            input_tensor, self.__original_image = load_image(image_path)
+            input_tensor: torch.Tensor = input_tensor
+            # print(input_tensor.sum())
+            self.__original_image = self.__original_image.numpy().astype(np.uint8)
+            scores, classification, transformed_anchors = self.__model(
+                torch.unsqueeze(input_tensor.to(ModelProxy.DEVICE), dim=0).float()
+            )
+            transformed_anchors = transformed_anchors.numpy()
+            predictions = pd.DataFrame(
+                {
+                    "scores": scores.numpy(),
+                    "class": classification.numpy(),
+                    "X1": transformed_anchors[:, 0],
+                    "Y1": transformed_anchors[:, 1],
+                    "X2": transformed_anchors[:, 2],
+                    "Y2": transformed_anchors[:, 3],
+                    "size": transformed_anchors[:, 4],
+                }
+            )
+            predictions = predictions.loc[predictions["class"] == 5]
+            predictions.drop("class", axis=1, inplace=True)
             predictions.reset_index(inplace=True)
             predictions.drop('index',axis=1,inplace=True)
             predictions['scores']=predictions['scores'].round(2)
@@ -48,7 +52,7 @@ class ModelProxy:
             return True
         except Exception as e:
             e.with_traceback()
-            self.__error_message=e
+            self.__error_message = e
             self.get_error_message()
             return False
     
@@ -68,7 +72,7 @@ class ModelProxy:
         return cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 
 
-    def get_error_message(self)->str:
+    def get_error_message(self) -> str:
         print(self.__error_message)
 
     def __annotate_image(self,row:pd.DataFrame,img:np.ndarray)->None:
@@ -111,10 +115,6 @@ if __name__=='__main__':
     predictions= [[0,1,2,3,4],[0,1,2,3]]
     for i,path in enumerate(paths):
         model.load_image(path)
-        cv2.imshow(f'Prediction{i}',model.get_image(predictions[i]))
+        cv2.imshow(f"Prediction{i}", model.get_image(predictions[i]))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    
-
-
-
