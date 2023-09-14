@@ -54,13 +54,14 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+import app.src.presentation.views.ui.resources
 
 
 class Ui_deep_fish_window(object):
     def setupUi(self, deep_fish_window):
         if not deep_fish_window.objectName():
             deep_fish_window.setObjectName("deep_fish_window")
-        deep_fish_window.resize(1006, 736)
+        deep_fish_window.resize(1052, 800)
         deep_fish_window.setStyleSheet(
             "#deep_fish_window{\n"
             "	background-color: #FFFFFF;\n"
@@ -123,6 +124,18 @@ class Ui_deep_fish_window(object):
             "#image_frame{\n"
             "	border: 1px solid;\n"
             "	border-radius: 20px;\n"
+            "}\n"
+            "\n"
+            "#logo_fr"
+            "ame{\n"
+            "	border: 1px solid;\n"
+            "	border-radius: 12px;\n"
+            "}\n"
+            "\n"
+            "#torpedo_retina_label{\n"
+            "	font-size: 30px;\n"
+            "	color: red;\n"
+            "	font-weight: 900;\n"
             "}"
         )
         self.centralwidget = QWidget(deep_fish_window)
@@ -145,9 +158,31 @@ class Ui_deep_fish_window(object):
         self.control_inner_frame.setFrameShape(QFrame.StyledPanel)
         self.control_inner_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.control_inner_frame)
-        self.verticalLayout_2.setSpacing(10)
+        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(10, 0, 10, 0)
+        self.logo_frame = QFrame(self.control_inner_frame)
+        self.logo_frame.setObjectName("logo_frame")
+        self.logo_frame.setFrameShape(QFrame.StyledPanel)
+        self.logo_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_3 = QVBoxLayout(self.logo_frame)
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.torpedo_logo_label = QLabel(self.logo_frame)
+        self.torpedo_logo_label.setObjectName("torpedo_logo_label")
+        self.torpedo_logo_label.setMaximumSize(QSize(300, 300))
+        self.torpedo_logo_label.setPixmap(QPixmap(":/images/logo.png"))
+        self.torpedo_logo_label.setScaledContents(True)
+
+        self.verticalLayout_3.addWidget(self.torpedo_logo_label)
+
+        self.torpedo_retina_label = QLabel(self.logo_frame)
+        self.torpedo_retina_label.setObjectName("torpedo_retina_label")
+        self.torpedo_retina_label.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_3.addWidget(self.torpedo_retina_label)
+
+        self.verticalLayout_2.addWidget(self.logo_frame)
+
         self.smallest_score_frame = QFrame(self.control_inner_frame)
         self.smallest_score_frame.setObjectName("smallest_score_frame")
         self.smallest_score_frame.setFrameShape(QFrame.StyledPanel)
@@ -242,7 +277,7 @@ class Ui_deep_fish_window(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.image_label.sizePolicy().hasHeightForWidth())
         self.image_label.setSizePolicy(sizePolicy)
-        self.image_label.setMinimumSize(QSize(510, 0))
+        self.image_label.setMinimumSize(QSize(0, 0))
         self.image_label.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_2.addWidget(self.image_label)
@@ -259,13 +294,17 @@ class Ui_deep_fish_window(object):
 
     def retranslateUi(self, deep_fish_window):
         deep_fish_window.setWindowTitle(
-            QCoreApplication.translate("deep_fish_window", "MainWindow", None)
+            QCoreApplication.translate("deep_fish_window", "Torpedo Retina", None)
+        )
+        self.torpedo_logo_label.setText("")
+        self.torpedo_retina_label.setText(
+            QCoreApplication.translate("deep_fish_window", "Torpedo-Retina", None)
         )
         self.smallest_score_label.setText(
             QCoreApplication.translate("deep_fish_window", "Smallest Score", None)
         )
         self.bounding_box_number_label.setText(
-            QCoreApplication.translate("deep_fish_window", "Bounding Box Numbers", None)
+            QCoreApplication.translate("deep_fish_window", "Bounding Box index", None)
         )
         self.display_all_check_box.setText(
             QCoreApplication.translate("deep_fish_window", "Display All", None)

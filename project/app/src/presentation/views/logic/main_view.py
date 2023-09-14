@@ -60,8 +60,8 @@ class MainView(QMainWindow, View):
 
     def __display_image(self, image_path: str) -> None:
         self.image_label.setPixmap(QPixmap(image_path).scaled(self.image_label.size()))
-        self.__set_max(self.proxy.get_bbox_number(self.score))
 
     def __reset(self) -> None:
+        self.__set_max(self.proxy.get_bbox_number(self.score))
         self.display_all_check_box.setChecked(False)
         self.bounding_box_number_spinbox.setValue(0)

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1006</width>
-    <height>736</height>
+    <width>1052</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Torpedo Retina</string>
   </property>
   <property name="styleSheet">
    <string notr="true">#deep_fish_window{
@@ -75,6 +75,17 @@ QSpinBox{
 #image_frame{
 	border: 1px solid;
 	border-radius: 20px;
+}
+
+#logo_frame{
+	border: 1px solid;
+	border-radius: 12px;
+}
+
+#torpedo_retina_label{
+	font-size: 30px;
+	color: red;
+	font-weight: 900;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -134,7 +145,7 @@ QSpinBox{
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -148,6 +159,47 @@ QSpinBox{
           <property name="bottomMargin">
            <number>0</number>
           </property>
+          <item>
+           <widget class="QFrame" name="logo_frame">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="torpedo_logo_label">
+               <property name="maximumSize">
+                <size>
+                 <width>300</width>
+                 <height>300</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="pixmap">
+                <pixmap resource="resources.qrc">:/images/logo.png</pixmap>
+               </property>
+               <property name="scaledContents">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="torpedo_retina_label">
+               <property name="text">
+                <string>Torpedo-Retina</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item>
            <widget class="QFrame" name="smallest_score_frame">
             <property name="frameShape">
@@ -225,7 +277,7 @@ QSpinBox{
              <item alignment="Qt::AlignLeft">
               <widget class="QLabel" name="bounding_box_number_label">
                <property name="text">
-                <string>Bounding Box Numbers</string>
+                <string>Bounding Box index</string>
                </property>
               </widget>
              </item>
@@ -347,7 +399,7 @@ QSpinBox{
          </property>
          <property name="minimumSize">
           <size>
-           <width>510</width>
+           <width>0</width>
            <height>0</height>
           </size>
          </property>
@@ -365,6 +417,8 @@ QSpinBox{
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
