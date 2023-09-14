@@ -11,7 +11,6 @@ class ImageHelper:
         frame: numpy.ndarray,
         label: QLabel,
     ) -> QImage:
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = QImage(
             frame,
             frame.shape[1],

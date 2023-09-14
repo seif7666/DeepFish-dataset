@@ -3,6 +3,7 @@ from typing import List
 from PySide6.QtWidgets import QMainWindow, QFileDialog
 from PySide6.QtGui import QPixmap
 from app.src.presentation.views.ui.main_view import Ui_deep_fish_window as View
+from app.src.core.helpers.image_helper import ImageHelper
 
 from proxy import ModelProxy
 
@@ -11,6 +12,8 @@ class MainView(QMainWindow, View):
     def __init__(self, proxy: ModelProxy, parent=None) -> None:
         super().__init__(parent)
         self.proxy = ModelProxy()
+        self.score = 0.5
+        self.bbox_number = 0
         self.setupUi(self)
         self.set_all()
         self.show()
@@ -29,22 +32,36 @@ class MainView(QMainWindow, View):
         )[0]
         if image == "":
             return
-        self.proxy.load_image(image)
-        self.__set_max(self.proxy.get_predictions())
-        self.__display_image(image)
+        self.__load_image(image)
 
     def display_all(self) -> None:
         if self.display_all_check_box.isChecked():
-            pass  # TODO: Display All Boxes
+            self.image = self.proxy.show_all_bboxes(self.score)
+            self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
 
     def score_changed(self) -> None:
-        pass  # TODO: Change Score and Display Image
+        self.score = self.smallest_score_spinbox.value()
+        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
+        self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
+        self.__reset()
 
     def bounding_boxes_changed(self) -> None:
-        pass  # TODO: Change boxes Number and Display Image
+        self.bbox_number = self.bounding_box_number_spinbox.value()
+        self.image = self.proxy.show_certain_bbox(self.bbox_number, self.score)
+        self.__display_image(ImageHelper.prepareImage(self.image, self.image_label))
 
-    def __set_max(self, predictions: List[int]) -> None:
-        self.bounding_box_number_spinbox.setMaximum(len(predictions))
+    def __load_image(self, image_path: str) -> None:
+        self.proxy.load_image(image_path)
+        self.__set_max(self.proxy.get_bbox_number(self.score))
+        self.score_changed()
+
+    def __set_max(self, bbox_number: int) -> None:
+        self.bounding_box_number_spinbox.setMaximum(bbox_number)
 
     def __display_image(self, image_path: str) -> None:
         self.image_label.setPixmap(QPixmap(image_path).scaled(self.image_label.size()))
+        self.__set_max(self.proxy.get_bbox_number(self.score))
+
+    def __reset(self) -> None:
+        self.display_all_check_box.setChecked(False)
+        self.bounding_box_number_spinbox.setValue(0)

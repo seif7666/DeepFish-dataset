@@ -91,7 +91,7 @@ class ModelProxy:
     def __set_model(self):
         try:
             torch.set_grad_enabled(False)
-            state_dict= torch.load('..\\bestModel.pt',torch.device(ModelProxy.DEVICE))
+            state_dict= torch.load('bestModel.pt',torch.device(ModelProxy.DEVICE))
             self.__model= PipelineModel(13)
             print(self.__model.detector.regressionModel)
             self.__model.to(ModelProxy.DEVICE)
