@@ -39,11 +39,12 @@ class MainView(QMainWindow, View):
 
     def __reset(self) -> None:
         self.bbox_number = 0
-        self.__set_max(self.proxy.get_bbox_number(self.score))
+        self.__set_max(self.proxy.get_bbox_number(self.score) - 1)
         self.bounding_box_number_spinbox.setValue(0)
 
     def __update(self) -> None:
         if self.display_all_check_box.isChecked():
+            self.__reset()
             self.bounding_box_number_spinbox.setDisabled(True)
             self.image = self.proxy.show_all_bboxes(self.score)
         else:
